@@ -24,7 +24,7 @@ def cache_result(func):
             # check if cached
             old_state = pickle.load(open(pickle_file, 'rb'))
             return old_state
-        # recalculate
+        # recalculate and cache
         result = func(*args, **kwargs)
         file = open(pickle_file, 'wb')
         pickle.dump(result, file)
