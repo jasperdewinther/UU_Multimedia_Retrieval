@@ -24,3 +24,9 @@ def get_all_meshes(files):
         mesh = trimesh.load(file)
         meshes.append(mesh)
     return meshes
+
+@decorators.time_func
+@decorators.cache_result
+def get_mesh(file):
+    mesh = trimesh.load(file)
+    return mesh

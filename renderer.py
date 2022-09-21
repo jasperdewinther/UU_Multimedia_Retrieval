@@ -2,6 +2,7 @@ import math
 import pyrender
 import numpy as np
 
+import PySimpleGUI as sg;
 
 def render_meshes(meshes):
     columns_and_rows = math.ceil(math.sqrt(len(meshes)))
@@ -21,6 +22,7 @@ def render_meshes(meshes):
     nc = pyrender.Node(camera=cam, matrix=np.eye(4))
     scene.add_node(nc)
 
-    # run renderer
-    pyrender.Viewer(
-        scene, use_raymond_lighting=True, viewport_size=(1280, 720))
+    # run renderer async
+    viewer = pyrender.Viewer(
+        scene, run_in_thread=True, use_raymond_lighting=True, viewport_size=(512, 512))
+
