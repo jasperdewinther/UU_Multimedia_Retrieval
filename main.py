@@ -10,10 +10,7 @@ import PySimpleGUI as sg
 mesh_files = mesh_io.get_all_obj_files("./assets/")
 meshes = mesh_io.get_all_meshes(mesh_files)
 
-filter_io.get_class(mesh_files)
-filter_io.get_faces_vertices(mesh_files)
-filter_io.get_face_type(mesh_files)
-filter_io.get_bounding_box(mesh_files)
+filter_io.output_filter(mesh_files)
 
 renderer.render_meshes([meshes[6]])
 
