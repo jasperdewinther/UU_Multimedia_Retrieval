@@ -1,16 +1,18 @@
 import math
 import pyrender
 import numpy as np
+import mesh_data
 
-import PySimpleGUI as sg;
+import PySimpleGUI as sg
 
-def render_meshes(meshes):
+
+def render_meshes(meshes: list[mesh_data.MeshData]):
     columns_and_rows = math.ceil(math.sqrt(len(meshes)))
     scene = pyrender.Scene()
 
     for i in range(len(meshes)):
         # add all the meshes and position them in a grid
-        mesh = pyrender.Mesh.from_trimesh(meshes[i])
+        mesh = pyrender.Mesh.from_trimesh(meshes[i].trimesh_data)
         node = scene.add(mesh)
         position = np.eye((4))
         position[:3, 3] = [(i % columns_and_rows)-columns_and_rows/2,
@@ -25,4 +27,3 @@ def render_meshes(meshes):
     # run renderer async
     viewer = pyrender.Viewer(
         scene, run_in_thread=True, use_raymond_lighting=True, viewport_size=(512, 512))
-

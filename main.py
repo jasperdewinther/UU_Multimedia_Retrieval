@@ -7,10 +7,9 @@ import filter_io
 import PySimpleGUI as sg
 
 
-mesh_files = mesh_io.get_all_obj_files("./assets/")
-meshes = mesh_io.get_all_meshes(mesh_files)
-
-filter_io.output_filter(mesh_files)
+meshes = mesh_io.get_all_obj_files("./assets/")  # sets filename_field
+meshes = mesh_io.get_all_meshes(meshes)  # sets trimesh_model field
+meshes = filter_io.output_filter(meshes)  # sets bb and triangle_count fields
 
 renderer.render_meshes([meshes[6]])
 
