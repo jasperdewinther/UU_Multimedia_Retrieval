@@ -18,6 +18,12 @@ def time_func(func):
 def cache_result(func):
     @wraps(func)
     def wrapped(*args, **kwargs):
+        if hasattr(wrapped, "has_run"):
+            raise Exception(
+                f"{func.__name__} cache function was called twice, this should not be possible")
+        else:
+            wrapped.has_run = True
+
         pickle_file = f'./pickle_cache/{func.__name__}.pickle'
         os.makedirs(os.path.dirname(pickle_file), exist_ok=True)
         if os.path.isfile(pickle_file):
