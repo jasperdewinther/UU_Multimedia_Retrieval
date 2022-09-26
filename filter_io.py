@@ -22,7 +22,7 @@ def output_filter(meshes: list[mesh_data.MeshData]) -> list[mesh_data.MeshData]:
         writer.writerow([os.path.basename(mesh.filename), class_shape,
                         faces, vertices, triangles, quads, bounding_box])
 
-        mesh.vertex_count = triangles + quads
+        mesh.vertex_count = vertices
         mesh.bounding_box = bounding_box
     f.close()
     return meshes
