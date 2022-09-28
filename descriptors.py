@@ -1,0 +1,35 @@
+import trimesh
+import mesh_data
+import math
+import ast
+import pandas as pd
+import os
+
+def get_global_descriptors(meshes):
+    # finds the surface area, compactness, axis-aligned boudning-box volume, diameter and eccentricity
+    counter = 0
+    for mesh in meshes:
+        # surface area
+        surface_area = mesh.area
+
+        #compactness
+        volume = mesh.volume
+        compactness = surface_area**3 / (36*math.pi*(volume)**2)
+
+        #axis-aligned bounding-box volume
+        data = pd.read_csv(os.getcwd() + '/faces_vertices.csv', sep=',')
+        bounding_box = data['bounding box'][counter]
+        boxList = ast.literal_eval(bounding_box)
+        x1 = float(boxList[0])
+        y1 = float(boxList[1])
+        z1 = float(boxList[2])
+        x2 = float(boxList[3])
+        y2 = float(boxList[4])
+        z2 = float(boxList[5])
+        bb_volume = math.sqrt((x1 - x2) ** 2 + (y1 - y2) ** 2 + (z1 - z2) ** 2)
+
+        #diameter
+        diameter = math.max(x1 - x2, y1 - y2, z1 - z2)
+
+        #eccentricity
+        print(surface_area + ", " + compactness + ", " + bb_volume + ", " + diameter)

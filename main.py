@@ -4,7 +4,9 @@ from gui import HandleGUIEvents, initGUI
 import mesh_io
 import renderer
 import filter_io
+import decorators
 import mesh_normalize
+import descriptors
 import pandas as pd
 
 
@@ -14,12 +16,14 @@ if __name__ == "__main__":
     meshes = filter_io.output_filter(meshes)  # determine details
     meshes = mesh_normalize.remesh_all_meshes(meshes)  # normalize mesh
 
-    renderer.render_meshes(meshes[:9])
+    descriptors.get_global_descriptors(meshes)
+    
+    #renderer.render_meshes(meshes[:9])
 
-    window = initGUI()
+    #window = initGUI()
 
-    while True:                             # The Event Loop
-        if not HandleGUIEvents(window):
-            break
+   #while True:                             # The Event Loop
+    #    if not HandleGUIEvents(window):
+    #        break
 
-    window.close()
+    #window.close()
