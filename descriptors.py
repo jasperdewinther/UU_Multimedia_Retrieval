@@ -6,7 +6,7 @@ import pandas as pd
 import os
 
 
-def get_global_descriptors(meshes: list[mesh_data.MeshData]):
+def get_global_descriptors(meshes: list[mesh_data.MeshData]) -> list[mesh_data.MeshData]:
     # finds the surface area, compactness, axis-aligned boudning-box volume, diameter and eccentricity
     counter = 0
     for mesh in meshes:
@@ -32,6 +32,11 @@ def get_global_descriptors(meshes: list[mesh_data.MeshData]):
         # diameter
         diameter = max(x1 - x2, y1 - y2, z1 - z2)
 
+        mesh.surface_area = surface_area
+        mesh.compactness = compactness
+        mesh.bb_volume = bb_volume
+        mesh.diameter = diameter
         # eccentricity
-        print(str(surface_area) + ", " + str(compactness) +
-              ", " + str(bb_volume) + ", " + str(diameter))
+        # print(str(surface_area) + ", " + str(compactness) +
+        #      ", " + str(bb_volume) + ", " + str(diameter))
+    return meshes

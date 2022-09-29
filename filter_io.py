@@ -23,6 +23,7 @@ def output_filter(meshes: list[mesh_data.MeshData]) -> list[mesh_data.MeshData]:
                         faces, vertices, triangles, quads, bounding_box])
 
         mesh.vertex_count = vertices
+        mesh.face_count = faces
         mesh.bounding_box = bounding_box
     f.close()
     return meshes
