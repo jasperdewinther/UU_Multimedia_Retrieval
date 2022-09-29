@@ -17,9 +17,9 @@ if __name__ == "__main__":
     meshes = filter_io.output_filter(meshes)  # determine details
     # mesh_data.summarize_data(meshes)
     # meshes = mesh_normalize.remesh_all_meshes(meshes)  # normalize mesh
+    # mesh_data.summarize_data(meshes)
     mesh_data.summarize_data(meshes)
-    descriptors.get_global_descriptors(meshes)
-    mesh_data.summarize_data(meshes)
+    meshes = descriptors.get_global_descriptors(meshes)
 
     # renderer.render_meshes(meshes[:9])
 

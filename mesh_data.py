@@ -1,5 +1,6 @@
 import trimesh
 import pandas as pd
+import matplotlib.pyplot as plt
 
 
 class MeshData:
@@ -46,4 +47,6 @@ def summarize_data(meshes: list[MeshData]):
             'bb_volume': [mesh.bb_volume]
         }
         df = pd.concat((pd.DataFrame.from_dict(data), df), ignore_index=True)
+    df.hist(bins=100, figsize=(20, 14))  # s is an instance of Series
+    plt.savefig('./figure.pdf')
     print(df.describe())
