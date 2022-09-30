@@ -1,19 +1,25 @@
 import mesh_data
+from trimesh import Trimesh
 
-def GetBaryCenter(mesh: mesh_data.MeshData):
-    print(mesh.trimesh_data.center_mass)
+def GetBaryCenter(mesh: Trimesh):
+    print(mesh.center_mass)
     return mesh.center_mass
 
+def NormalizeTranslation(mesh: Trimesh):
+    baryCenter = GetBaryCenter(mesh)
+    for vertex in mesh.vertices:
+        vertex -= baryCenter
+
 def NormalizeTranslations(meshes: list[mesh_data.MeshData]):
-    baryCenter = GetBaryCenter
     for mesh in meshes:
+        baryCenter = GetBaryCenter(mesh.trimesh_data)
         for vertex in mesh.trimesh_data.vertices:
             vertex -= baryCenter
 
 def GetBoundingBoxBiggestAxis(boundingbox: list[float]):
-    Dx = boundingbox[0] - boundingbox[3]
-    Dy = boundingbox[1] - boundingbox[4]
-    Dz = boundingbox[2] - boundingbox[5]
+    Dx = boundingbox[3] - boundingbox[0]
+    Dy = boundingbox[4] - boundingbox[1]
+    Dz = boundingbox[5] - boundingbox[2]
 
     return max(Dx, Dy, Dz)
 
