@@ -14,14 +14,18 @@ import mesh_data
 if __name__ == "__main__":
     meshes = mesh_io.get_all_obj_files("./assets/")  # sets filename_field
     meshes = mesh_io.get_all_meshes(meshes)  # sets trimesh_model field
+    meshes = mesh_normalize.remesh_all_meshes(meshes)  # normalize mesh
+    meshes = filter_io.remove_degenerate_models(meshes)
     meshes = filter_io.output_filter(meshes)  # determine details
-    # mesh_data.summarize_data(meshes)
-    # meshes = mesh_normalize.remesh_all_meshes(meshes)  # normalize mesh
-    # mesh_data.summarize_data(meshes)
-    mesh_data.summarize_data(meshes)
     meshes = descriptors.get_global_descriptors(meshes)
+    mesh_data.summarize_data(meshes)
 
-    # renderer.render_meshes(meshes[:9])
+    model = []
+    for mesh in meshes:
+        if mesh.vertex_count > 10000:
+            model.append(mesh)
+    # mesh_data.summarize_data(model)
+    renderer.render_meshes(meshes[:50])
 
     #window = initGUI()
 

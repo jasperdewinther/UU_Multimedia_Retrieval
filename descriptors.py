@@ -4,8 +4,11 @@ import math
 import ast
 import pandas as pd
 import os
+import decorators
 
 
+@decorators.time_func
+@decorators.cache_result
 def get_global_descriptors(meshes: list[mesh_data.MeshData]) -> list[mesh_data.MeshData]:
     # finds the surface area, compactness, axis-aligned boudning-box volume, diameter and eccentricity
     counter = 0
@@ -15,7 +18,7 @@ def get_global_descriptors(meshes: list[mesh_data.MeshData]) -> list[mesh_data.M
 
         # compactness
         volume = mesh.trimesh_data.volume
-        compactness = surface_area**3 / (36*math.pi*(volume)**2)
+        compactness = (surface_area**3) / (36*math.pi*(volume**2))
 
         # axis-aligned bounding-box volume
         data = pd.read_csv(os.getcwd() + '/faces_vertices.csv', sep=',')
@@ -27,10 +30,10 @@ def get_global_descriptors(meshes: list[mesh_data.MeshData]) -> list[mesh_data.M
         x2 = float(boxList[3])
         y2 = float(boxList[4])
         z2 = float(boxList[5])
-        bb_volume = math.sqrt((x1 - x2) ** 2 + (y1 - y2) ** 2 + (z1 - z2) ** 2)
+        bb_volume = abs(x2 - x1) * abs(y2 - y1) * abs(z2 - z1)
 
         # diameter
-        diameter = max(x1 - x2, y1 - y2, z1 - z2)
+        diameter = max(x2 - x1, y2 - y1, z2 - z1)
 
         mesh.surface_area = surface_area
         mesh.compactness = compactness

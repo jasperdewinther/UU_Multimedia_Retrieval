@@ -4,6 +4,24 @@ import csv
 import numpy as np
 import decorators
 import mesh_data
+import math
+
+
+@decorators.time_func
+def remove_degenerate_models(meshes: list[mesh_data.MeshData]) -> list[mesh_data.MeshData]:
+    i = 0
+    while i < len(meshes):
+        if meshes[i].trimesh_data.volume <= 0 or meshes[i].trimesh_data.volume == math.nan or meshes[i].trimesh_data.volume == math.inf:
+            meshes.pop(i)
+            continue
+        if meshes[i].trimesh_data.area <= 0 or meshes[i].trimesh_data.area == math.nan or meshes[i].trimesh_data.area == math.inf:
+            meshes.pop(i)
+            continue
+        # if not meshes[i].trimesh_data.is_watertight:
+            # meshes.pop(i)
+            # continue
+        i += 1
+    return meshes
 
 
 @decorators.time_func

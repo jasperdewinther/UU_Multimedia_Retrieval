@@ -3,6 +3,8 @@ import mesh_data
 import pyfqmr
 import trimesh
 import os
+from tqdm import tqdm
+import pyvista as pv
 
 
 @decorators.time_func
@@ -10,10 +12,22 @@ import os
 def remesh_all_meshes(meshes: list[mesh_data.MeshData]) -> list[mesh_data.MeshData]:
     # load the mesh of every .obj file
     for mesh in meshes:
-        if len(mesh.trimesh_data.vertices) < 5000:
-            while len(mesh.trimesh_data.vertices) < 5000:
+        mesh.trimesh_data = mesh.trimesh_data.process(validate=True)
+        mesh.trimesh_data.fill_holes()
+
+        pv_mesh = pv.wrap(mesh.trimesh_data)
+        to_probe = pv.create_grid(pv_mesh)
+        result = pv_mesh.sample(to_probe)
+
+        mesh.trimesh_data = trimesh.Trimesh(
+            result.points, result.faces.reshape(-1, 4)[:, 1:])
+
+        if len(mesh.trimesh_data.vertices) < 1000:
+            print(mesh.filename, str(len(mesh.trimesh_data.vertices)))
+            while len(mesh.trimesh_data.vertices) < 1000:
                 mesh.trimesh_data = mesh.trimesh_data.subdivide()
-        if len(mesh.trimesh_data.vertices) > 10_000:
+                print(str(len(mesh.trimesh_data.vertices)))
+        if len(mesh.trimesh_data.vertices) > 5000:
             mesh.trimesh_data = simplify_mesh(mesh.trimesh_data)
 
     return meshes
@@ -24,10 +38,7 @@ def simplify_mesh(mesh: trimesh.Trimesh) -> trimesh.Trimesh:
     mesh_simplifier.setMesh(
         mesh.vertices, mesh.faces)
     mesh_simplifier.simplify_mesh(
-        target_count=7000, verbose=0)
+        target_count=5000, verbose=0)
     vertices, faces, normals = mesh_simplifier.getMesh()
-    mesh.vertices = vertices
-    mesh.faces = faces
-    mesh.vertex_normals = normals
-    new_mesh = trimesh.Trimesh(vertices)
+    new_mesh = trimesh.Trimesh(vertices, faces, normals)
     return new_mesh
