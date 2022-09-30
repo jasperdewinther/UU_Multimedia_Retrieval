@@ -10,7 +10,7 @@ def NormalizeTranslations(meshes: list[mesh_data.MeshData]):
         for vertex in mesh.trimesh_data.vertices:
             vertex -= baryCenter
 
-def GetBoundingBoxBiggestAxis(boundingbox):
+def GetBoundingBoxBiggestAxis(boundingbox: list[float]):
     Dx = boundingbox[0] - boundingbox[3]
     Dy = boundingbox[1] - boundingbox[4]
     Dz = boundingbox[2] - boundingbox[5]
