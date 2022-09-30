@@ -22,12 +22,12 @@ def remesh_all_meshes(meshes: list[mesh_data.MeshData]) -> list[mesh_data.MeshDa
         mesh.trimesh_data = trimesh.Trimesh(
             result.points, result.faces.reshape(-1, 4)[:, 1:])
 
-        if len(mesh.trimesh_data.vertices) < 1000:
-            print(mesh.filename, str(len(mesh.trimesh_data.vertices)))
-            while len(mesh.trimesh_data.vertices) < 1000:
+        if len(mesh.trimesh_data.faces) < 1000:
+            print(mesh.filename, str(len(mesh.trimesh_data.faces)))
+            while len(mesh.trimesh_data.faces) < 1000:
                 mesh.trimesh_data = mesh.trimesh_data.subdivide()
-                print(str(len(mesh.trimesh_data.vertices)))
-        if len(mesh.trimesh_data.vertices) > 5000:
+                print(str(len(mesh.trimesh_data.faces)))
+        if len(mesh.trimesh_data.faces) > 5000:
             mesh.trimesh_data = simplify_mesh(mesh.trimesh_data)
 
     return meshes
