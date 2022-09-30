@@ -17,9 +17,9 @@ def NormalizeTranslations(meshes: list[mesh_data.MeshData]):
             vertex -= baryCenter
 
 def GetBoundingBoxBiggestAxis(boundingbox: list[float]):
-    Dx = boundingbox[3] - boundingbox[0]
-    Dy = boundingbox[4] - boundingbox[1]
-    Dz = boundingbox[5] - boundingbox[2]
+    Dx = abs(boundingbox[3] - boundingbox[0])
+    Dy = abs(boundingbox[4] - boundingbox[1])
+    Dz = abs(boundingbox[5] - boundingbox[2])
 
     return max(Dx, Dy, Dz)
 
