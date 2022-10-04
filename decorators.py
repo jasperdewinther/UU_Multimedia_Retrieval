@@ -2,9 +2,10 @@ from functools import wraps
 import time
 import pickle
 import os
+from typing import Callable
 
 
-def time_func(func):
+def time_func(func: Callable) -> Callable:
     @wraps(func)
     def wrapped(*args, **kwargs):
         start = time.time()
@@ -15,7 +16,7 @@ def time_func(func):
     return wrapped
 
 
-def cache_result(func):
+def cache_result(func: Callable) -> Callable:
     @wraps(func)
     def wrapped(*args, **kwargs):
         if hasattr(wrapped, "has_run"):

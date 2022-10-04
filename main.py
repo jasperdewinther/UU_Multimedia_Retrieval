@@ -31,7 +31,7 @@ if __name__ == "__main__":
             mesh.vertex_count), "face count:", str(mesh.face_count))
     renderer.render_meshes(torender)
 
-    # window = initGUI()
+    window = initGUI()
 
    # while True:                             # The Event Loop
     #    if not HandleGUIEvents(window):

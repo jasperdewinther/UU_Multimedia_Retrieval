@@ -1,5 +1,6 @@
 from trimesh import Trimesh
 import os
+from typing import Union
 import csv
 import numpy as np
 import decorators
@@ -47,21 +48,21 @@ def output_filter(meshes: list[mesh_data.MeshData]) -> list[mesh_data.MeshData]:
     return meshes
 
 
-def get_class(mesh_file: str):
+def get_class(mesh_file: str) -> str:
     # finds the the class of the shape (for sheep, etc this is "assets")
     full_path = os.path.dirname(mesh_file)
     class_shape = os.path.basename(full_path)
     return class_shape
 
 
-def get_faces_vertices(mesh: Trimesh):
+def get_faces_vertices(mesh: Trimesh) -> Union[int, int]:
     # finds number of vertices and faces of the shape and writes to csv file
     faces = mesh.faces.shape[0]
     vertices = mesh.vertices.shape[0]
     return faces, vertices
 
 
-def get_face_type(mesh_file: str):
+def get_face_type(mesh_file: str) -> Union[bool, bool]:
     # find the types of faces
     triangles = False
     quads = False
@@ -79,7 +80,7 @@ def get_face_type(mesh_file: str):
     return triangles, quads
 
 
-def get_bounding_box(mesh_file: str):
+def get_bounding_box(mesh_file: str) -> list[float]:
     # find bounding box of the shape
     # [x_min, y_min, z_min, x_max, y_max, z_max]
     bounding_box = [np.inf, np.inf, np.inf, -np.inf, -np.inf, -np.inf]

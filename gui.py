@@ -2,7 +2,7 @@ import PySimpleGUI as sg
 import mesh_io
 
 
-def initGUI():
+def initGUI() -> sg.Window:
     sg.theme('DarkAmber')   # Add a touch of color
     # All the stuff inside your window.
     layout = [[sg.Text('Filepath')],
@@ -14,7 +14,7 @@ def initGUI():
     return window
 
 
-def HandleGUIEvents(window):
+def HandleGUIEvents(window: sg.Window) -> bool:
     event, input = window.read()
     print(event, input)
     model = mesh_io.get_mesh(input)

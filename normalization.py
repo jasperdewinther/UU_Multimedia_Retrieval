@@ -2,14 +2,17 @@ import mesh_data
 from trimesh import Trimesh
 import numpy as np
 
-def GetBaryCenter(mesh: Trimesh):
+
+def GetBaryCenter(mesh: Trimesh) -> ArrayLike:
     print(mesh.center_mass)
     return mesh.center_mass
+
 
 def NormalizeTranslation(mesh: Trimesh):
     baryCenter = GetBaryCenter(mesh)
     for vertex in mesh.vertices:
         vertex -= baryCenter
+
 
 def NormalizeTranslations(meshes: list[mesh_data.MeshData]):
     for mesh in meshes:
@@ -17,12 +20,14 @@ def NormalizeTranslations(meshes: list[mesh_data.MeshData]):
         for vertex in mesh.trimesh_data.vertices:
             vertex -= baryCenter
 
-def GetBoundingBoxBiggestAxis(boundingbox: list[float]):
+
+def GetBoundingBoxBiggestAxis(boundingbox: list[float]) -> float:
     Dx = abs(boundingbox[3] - boundingbox[0])
     Dy = abs(boundingbox[4] - boundingbox[1])
     Dz = abs(boundingbox[5] - boundingbox[2])
 
     return max(Dx, Dy, Dz)
+
 
 def NormalizeScale(meshes: list[mesh_data.MeshData]):
     for mesh in meshes:
@@ -30,7 +35,8 @@ def NormalizeScale(meshes: list[mesh_data.MeshData]):
         for vertex in mesh.trimesh_data.vertices:
             vertex *= scale_factor
 
-def GetEigenValuesAndVectors(mesh: Trimesh):
+
+def GetEigenValuesAndVectors(mesh: Trimesh) -> tuple[ArrayLike, ArrayLike]:
     n_points = len(mesh.vertices)
     x_coords = [vertex[0] for vertex in mesh.vertices]
     y_coords = [vertex[1] for vertex in mesh.vertices]
@@ -42,6 +48,6 @@ def GetEigenValuesAndVectors(mesh: Trimesh):
 
     A_cov = np.cov(A)
 
-    eigenvalues, eigenvectors = np.linalg.eig(A_cov);
+    eigenvalues, eigenvectors = np.linalg.eig(A_cov)
 
     return eigenvalues, eigenvectors

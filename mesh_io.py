@@ -27,5 +27,5 @@ def get_all_meshes(meshes: list[mesh_data.MeshData]) -> list[mesh_data.MeshData]
     return meshes
 
 
-def get_mesh(file_name):
+def get_mesh(file_name: str) -> trimesh.Trimesh:
     return trimesh.load(file_name)
