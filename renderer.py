@@ -1,12 +1,12 @@
 import math
 import pyrender
 import numpy as np
-import mesh_data
+from mesh_data import MeshData
 
 import PySimpleGUI as sg
 
 
-def render_meshes(meshes: list[mesh_data.MeshData]):
+def render_meshes(meshes: list[MeshData]):
     columns_and_rows = math.ceil(math.sqrt(len(meshes)))
     scene = pyrender.Scene()
 

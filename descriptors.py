@@ -38,14 +38,14 @@ def get_global_descriptors(meshes: list[mesh_data.MeshData]) -> list[mesh_data.M
         # eccentricity
         # print(str(surface_area) + ", " + str(compactness) +
         #      ", " + str(bb_volume) + ", " + str(diameter))
-        eccentricity = 0;
+        eccentricity = 0
 
         mesh.surface_area = surface_area
         mesh.compactness = compactness
         mesh.bb_volume = bb_volume
         mesh.diameter = diameter
         mesh.eccentricity = eccentricity
-        
+
         counter += 1
 
     return meshes

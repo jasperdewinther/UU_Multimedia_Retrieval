@@ -4,12 +4,13 @@ from typing import Union
 import csv
 import numpy as np
 import decorators
-import mesh_data
+from mesh_data import MeshData
 import math
 
 
 @decorators.time_func
-def remove_degenerate_models(meshes: list[mesh_data.MeshData]) -> list[mesh_data.MeshData]:
+@decorators.cache_result
+def remove_degenerate_models(meshes: list[MeshData]) -> list[MeshData]:
     i = 0
     while i < len(meshes):
         if meshes[i].trimesh_data.volume <= 0 or meshes[i].trimesh_data.volume == math.nan or meshes[i].trimesh_data.volume == math.inf:
@@ -27,7 +28,7 @@ def remove_degenerate_models(meshes: list[mesh_data.MeshData]) -> list[mesh_data
 
 @decorators.time_func
 @decorators.cache_result
-def output_filter(meshes: list[mesh_data.MeshData]) -> list[mesh_data.MeshData]:
+def output_filter(meshes: list[MeshData]) -> list[MeshData]:
     # creates csv file with data from every shape
     f = open(os.getcwd() + '/faces_vertices.csv', 'w')
     writer = csv.writer(f)

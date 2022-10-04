@@ -20,6 +20,10 @@ if __name__ == "__main__":
     meshes = descriptors.get_global_descriptors(meshes)
     mesh_data.summarize_data(meshes)
 
+    print(mesh_data.generate_histogram(meshes, 100, 'vertex_count'))
+    mesh_data.render_histogram(
+        meshes, 100, 'vertex_count', 'vertex_count_hist.png')
+
     model = []
     for mesh in meshes:
         if mesh.vertex_count > 10000:

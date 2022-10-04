@@ -1,11 +1,13 @@
-import trimesh
-import pandas as pd
+from numpy.typing import ArrayLike
+import numpy as np
 import matplotlib.pyplot as plt
+import pandas as pd
+from trimesh import Trimesh
 
 
 class MeshData:
     filename: str
-    trimesh_data: trimesh.Trimesh
+    trimesh_data: Trimesh
     bounding_box: list[float]  # [x_min, y_min, z_min, x_max, y_max, z_max]
     vertex_count: int
     face_count: int
@@ -49,4 +51,23 @@ def summarize_data(meshes: list[MeshData]):
         df = pd.concat((pd.DataFrame.from_dict(data), df), ignore_index=True)
     print(df.describe())
     df.hist(bins=100, figsize=(20, 14))  # s is an instance of Series
-    plt.savefig('./figure.pdf')
+    plt.savefig('./figure.png')
+    plt.clf()
+
+
+def generate_histogram(meshes: list[MeshData], bins: int, member: str) -> ArrayLike:
+    data = np.zeros((len(meshes)))
+    for i, mesh in enumerate(meshes):
+        data[i] = getattr(mesh, member)
+    hist = np.histogram(data, bins)
+    return hist
+
+
+def render_histogram(meshes: list[MeshData], bins: int, member: str, filename: str):
+    data = np.zeros((len(meshes)))
+    for i, mesh in enumerate(meshes):
+        data[i] = getattr(mesh, member)
+    counts, bin_sizes = np.histogram(data, bins)
+    plt.stairs(counts, bin_sizes, fill=True)
+    plt.savefig(filename)
+    plt.clf()
