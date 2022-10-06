@@ -12,17 +12,19 @@ import math
 @decorators.cache_result
 def remove_degenerate_models(meshes: list[MeshData]) -> list[MeshData]:
     i = 0
+    print(len(meshes))
     while i < len(meshes):
-        if meshes[i].trimesh_data.volume <= 0 or meshes[i].trimesh_data.volume == math.nan or meshes[i].trimesh_data.volume == math.inf:
+        if meshes[i].trimesh_data.volume <= 0 or meshes[i].trimesh_data.volume == math.nan or abs(meshes[i].trimesh_data.volume) == math.inf:
             meshes.pop(i)
             continue
-        if meshes[i].trimesh_data.area <= 0 or meshes[i].trimesh_data.area == math.nan or meshes[i].trimesh_data.area == math.inf:
+        if meshes[i].trimesh_data.area <= 0 or meshes[i].trimesh_data.area == math.nan or abs(meshes[i].trimesh_data.area) == math.inf:
             meshes.pop(i)
             continue
-        # if not meshes[i].trimesh_data.is_watertight:
-            # meshes.pop(i)
-            # continue
+        if meshes[i].trimesh_data.is_watertight:
+            meshes.pop(i)
+            continue
         i += 1
+    print(len(meshes))
     return meshes
 
 
@@ -38,7 +40,7 @@ def output_filter(meshes: list[MeshData]) -> list[MeshData]:
         class_shape = get_class(mesh.filename)
         faces, vertices = get_faces_vertices(mesh.trimesh_data)
         triangles, quads = get_face_type(mesh.filename)
-        bounding_box = get_bounding_box(mesh.filename)
+        bounding_box = get_bounding_box(mesh.trimesh_data)
         writer.writerow([os.path.basename(mesh.filename), class_shape,
                         faces, vertices, triangles, quads, bounding_box])
 
@@ -81,29 +83,21 @@ def get_face_type(mesh_file: str) -> Union[bool, bool]:
     return triangles, quads
 
 
-def get_bounding_box(mesh_file: str) -> list[float]:
+def get_bounding_box(mesh: Trimesh) -> list[float]:
     # find bounding box of the shape
     # [x_min, y_min, z_min, x_max, y_max, z_max]
     bounding_box = [np.inf, np.inf, np.inf, -np.inf, -np.inf, -np.inf]
-    f = open(mesh_file, 'r')
-    for lines in f:
-        lines_array = lines.split()
-        if len(lines_array) > 0:
-            if lines_array[0] == 'v':
-                vertices = []
-                vertices.append(float(lines_array[1]))
-                vertices.append(float(lines_array[2]))
-                vertices.append(float(lines_array[3]))
-                if bounding_box[0] > vertices[0]:
-                    bounding_box[0] = vertices[0]
-                if bounding_box[1] > vertices[1]:
-                    bounding_box[1] = vertices[1]
-                if bounding_box[2] > vertices[2]:
-                    bounding_box[2] = vertices[2]
-                if bounding_box[3] < vertices[0]:
-                    bounding_box[3] = vertices[0]
-                if bounding_box[4] < vertices[1]:
-                    bounding_box[4] = vertices[1]
-                if bounding_box[5] < vertices[2]:
-                    bounding_box[5] = vertices[2]
+    for vertex in mesh.vertices:
+        if bounding_box[0] > vertex[0]:
+            bounding_box[0] = vertex[0]
+        if bounding_box[1] > vertex[1]:
+            bounding_box[1] = vertex[1]
+        if bounding_box[2] > vertex[2]:
+            bounding_box[2] = vertex[2]
+        if bounding_box[3] < vertex[0]:
+            bounding_box[3] = vertex[0]
+        if bounding_box[4] < vertex[1]:
+            bounding_box[4] = vertex[1]
+        if bounding_box[5] < vertex[2]:
+            bounding_box[5] = vertex[2]
     return bounding_box
