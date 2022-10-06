@@ -82,6 +82,21 @@ def get_face_type(mesh_file: str) -> Union[bool, bool]:
                 return triangles, quads
     return triangles, quads
 
+def get_bounding_box(mesh: Trimesh):
+    bounding_box = [np.inf, np.inf, np.inf, -np.inf, -np.inf, -np.inf]
+    for vertex in mesh.vertices:
+        if bounding_box[0] > vertex[0]:
+            bounding_box[0] = vertex[0]
+        if bounding_box[1] > vertex[1]:
+            bounding_box[1] = vertex[1]
+        if bounding_box[2] > vertex[2]:
+            bounding_box[2] = vertex[2]
+        if bounding_box[3] < vertex[0]:
+            bounding_box[3] = vertex[0]
+        if bounding_box[4] < vertex[1]:
+            bounding_box[4] = vertex[1]
+        if bounding_box[5] < vertex[2]:
+            bounding_box[5] = vertex[2]
 
 def get_bounding_box(mesh: Trimesh) -> list[float]:
     # find bounding box of the shape
@@ -101,3 +116,30 @@ def get_bounding_box(mesh: Trimesh) -> list[float]:
         if bounding_box[5] < vertex[2]:
             bounding_box[5] = vertex[2]
     return bounding_box
+
+# def get_bounding_box(mesh_file: str):
+#     # find bounding box of the shape
+#     # [x_min, y_min, z_min, x_max, y_max, z_max]
+#     bounding_box = [np.inf, np.inf, np.inf, -np.inf, -np.inf, -np.inf]
+#     f = open(mesh_file, 'r')
+#     for lines in f:
+#         lines_array = lines.split()
+#         if len(lines_array) > 0:
+#             if lines_array[0] == 'v':
+#                 vertices = []
+#                 vertices.append(float(lines_array[1]))
+#                 vertices.append(float(lines_array[2]))
+#                 vertices.append(float(lines_array[3]))
+#                 if bounding_box[0] > vertices[0]:
+#                     bounding_box[0] = vertices[0]
+#                 if bounding_box[1] > vertices[1]:
+#                     bounding_box[1] = vertices[1]
+#                 if bounding_box[2] > vertices[2]:
+#                     bounding_box[2] = vertices[2]
+#                 if bounding_box[3] < vertices[0]:
+#                     bounding_box[3] = vertices[0]
+#                 if bounding_box[4] < vertices[1]:
+#                     bounding_box[4] = vertices[1]
+#                 if bounding_box[5] < vertices[2]:
+#                     bounding_box[5] = vertices[2]
+#     return bounding_box

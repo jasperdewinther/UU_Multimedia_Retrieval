@@ -2,6 +2,7 @@ from mesh_data import MeshData
 from trimesh import Trimesh
 import numpy as np
 from numpy.typing import ArrayLike
+import decorators
 
 
 def GetBaryCenter(mesh: Trimesh) -> ArrayLike:
@@ -14,12 +15,15 @@ def NormalizeTranslation(mesh: Trimesh):
     for vertex in mesh.vertices:
         vertex -= baryCenter
 
-
-def NormalizeTranslations(meshes: list[MeshData]):
+@decorators.time_func
+@decorators.cache_result
+def NormalizeTranslations(meshes: list[MeshData]) -> list[MeshData]:
     for mesh in meshes:
         baryCenter = GetBaryCenter(mesh.trimesh_data)
         for vertex in mesh.trimesh_data.vertices:
             vertex -= baryCenter
+
+    return meshes
 
 
 def GetBoundingBoxBiggestAxis(boundingbox: list[float]) -> float:
@@ -29,12 +33,15 @@ def GetBoundingBoxBiggestAxis(boundingbox: list[float]) -> float:
 
     return max(Dx, Dy, Dz)
 
-
-def NormalizeScale(meshes: list[MeshData]):
+@decorators.time_func
+@decorators.cache_result
+def NormalizeScales(meshes: list[MeshData]) -> list[MeshData]:
     for mesh in meshes:
         scale_factor = 1 / GetBoundingBoxBiggestAxis(mesh.bounding_box)
         for vertex in mesh.trimesh_data.vertices:
             vertex *= scale_factor
+
+    return meshes
 
 
 def GetEigenValuesAndVectors(mesh: Trimesh) -> tuple[ArrayLike, ArrayLike]:
