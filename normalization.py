@@ -69,36 +69,39 @@ def GetEigenValuesAndVectors(mesh: Trimesh) -> tuple[ArrayLike, ArrayLike]:
 @decorators.time_func
 @decorators.cache_result
 def NormalizeAlignments(meshes: list[MeshData]) -> list[MeshData]:
-    yes = True
     for mesh in meshes:
-        eigenvalues, eigenvectors = GetEigenValuesAndVectors(mesh.trimesh_data)
-        for vertex in mesh.trimesh_data.vertices:
-            if (yes):
-                print(vertex)
-            vertex[0] = np.dot(vertex, eigenvectors[0])
-            vertex[1] = np.dot(vertex, eigenvectors[1])
-            vertex[2] = np.dot(vertex, np.cross(eigenvectors[0], eigenvectors[1]))
-            if (yes):
-                print(vertex)
+        eigenvectors = mesh.trimesh_data.principal_inertia_vectors
 
-            yes = False
-    
-    return meshes
+        for vertex in mesh.trimesh_data.vertices:
+            # print("old", vertex)
+            new_vertex = [0, 0, 0]
+            new_vertex[0] = np.dot(vertex, eigenvectors[0])
+            new_vertex[1] = np.dot(vertex, eigenvectors[1])
+            new_vertex[2] = np.dot(vertex, np.cross(eigenvectors[0], eigenvectors[1]))
+
+            vertex[0] = new_vertex[0]
+            vertex[1] = new_vertex[1]
+            vertex[2] = new_vertex[2]
+            # print("new", vertex)
+
+    return mesh
 
 def NormalizeAlignment(mesh: MeshData) -> MeshData:
-    eigenvalues, eigenvectors = GetEigenValuesAndVectors(mesh.trimesh_data)
+    #eigenvalues, eigenvectors = GetEigenValuesAndVectors(mesh.trimesh_data)
 
-    print ("centroid: ", mesh.trimesh_data.centroid)
-
+    eigenvectors = mesh.trimesh_data.principal_inertia_vectors
 
     for vertex in mesh.trimesh_data.vertices:
-        #print(vertex)
-        vertex[0] = np.dot(vertex, eigenvectors[0])
-        vertex[1] = np.dot(vertex, eigenvectors[1])
-        vertex[2] = np.dot(vertex, np.cross(eigenvectors[0], eigenvectors[1]))
-        #print(vertex)
+        # print("old", vertex)
+        new_vertex = [0, 0, 0]
+        new_vertex[0] = np.dot(vertex, eigenvectors[0])
+        new_vertex[1] = np.dot(vertex, eigenvectors[1])
+        new_vertex[2] = np.dot(vertex, np.cross(eigenvectors[0], eigenvectors[1]))
 
-    print (mesh.trimesh_data.centroid)
-    print(eigenvectors)
+        vertex[0] = new_vertex[0]
+        vertex[1] = new_vertex[1]
+        vertex[2] = new_vertex[2]
+        # print("new", vertex)
+
     return mesh
 
