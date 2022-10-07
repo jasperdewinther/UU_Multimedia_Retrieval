@@ -84,7 +84,7 @@ def NormalizeAlignments(meshes: list[MeshData]) -> list[MeshData]:
             vertex[2] = new_vertex[2]
             # print("new", vertex)
 
-    return mesh
+    return meshes
 
 def NormalizeAlignment(mesh: MeshData) -> MeshData:
     #eigenvalues, eigenvectors = GetEigenValuesAndVectors(mesh.trimesh_data)
