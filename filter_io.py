@@ -12,17 +12,19 @@ import math
 @decorators.cache_result
 def remove_degenerate_models(meshes: list[MeshData]) -> list[MeshData]:
     i = 0
+    print(len(meshes))
     while i < len(meshes):
-        if meshes[i].trimesh_data.volume <= 0 or meshes[i].trimesh_data.volume == math.nan or meshes[i].trimesh_data.volume == math.inf:
+        if meshes[i].trimesh_data.volume <= 0 or meshes[i].trimesh_data.volume == math.nan or abs(meshes[i].trimesh_data.volume) == math.inf:
             meshes.pop(i)
             continue
-        if meshes[i].trimesh_data.area <= 0 or meshes[i].trimesh_data.area == math.nan or meshes[i].trimesh_data.area == math.inf:
+        if meshes[i].trimesh_data.area <= 0 or meshes[i].trimesh_data.area == math.nan or abs(meshes[i].trimesh_data.area) == math.inf:
             meshes.pop(i)
             continue
-        # if not meshes[i].trimesh_data.is_watertight:
-            # meshes.pop(i)
-            # continue
+        if meshes[i].trimesh_data.is_watertight:
+            meshes.pop(i)
+            continue
         i += 1
+    print(len(meshes))
     return meshes
 
 
@@ -95,7 +97,24 @@ def get_bounding_box(mesh: Trimesh):
             bounding_box[4] = vertex[1]
         if bounding_box[5] < vertex[2]:
             bounding_box[5] = vertex[2]
-    
+
+def get_bounding_box(mesh: Trimesh) -> list[float]:
+    # find bounding box of the shape
+    # [x_min, y_min, z_min, x_max, y_max, z_max]
+    bounding_box = [np.inf, np.inf, np.inf, -np.inf, -np.inf, -np.inf]
+    for vertex in mesh.vertices:
+        if bounding_box[0] > vertex[0]:
+            bounding_box[0] = vertex[0]
+        if bounding_box[1] > vertex[1]:
+            bounding_box[1] = vertex[1]
+        if bounding_box[2] > vertex[2]:
+            bounding_box[2] = vertex[2]
+        if bounding_box[3] < vertex[0]:
+            bounding_box[3] = vertex[0]
+        if bounding_box[4] < vertex[1]:
+            bounding_box[4] = vertex[1]
+        if bounding_box[5] < vertex[2]:
+            bounding_box[5] = vertex[2]
     return bounding_box
 
 # def get_bounding_box(mesh_file: str) -> list[float]:

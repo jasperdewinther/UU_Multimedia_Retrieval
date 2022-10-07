@@ -4,6 +4,9 @@ import pyfqmr
 from trimesh import Trimesh
 import os
 import pyvista as pv
+import pymeshfix
+from tqdm import tqdm
+import pymeshfix as mf
 
 
 @decorators.time_func
@@ -11,23 +14,44 @@ import pyvista as pv
 def remesh_all_meshes(meshes: list[MeshData]) -> list[MeshData]:
     # load the mesh of every .obj file
     for mesh in meshes:
+        # print(
+        #    f"vertices {len(mesh.trimesh_data.vertices)} faces {len(mesh.trimesh_data.faces)}")
+        #pv_mesh = pv.wrap(mesh.trimesh_data)
+        #meshfix = mf.MeshFix(pv_mesh)
+        # meshfix.repair()
+        # to_probe = pv.create_grid(pv_mesh)
+        # result = pv_mesh.sample(to_probe)
+        # print(f"{mesh.filename}")
+        # print("pymeshfixing")
+        # vclean, fclean = pymeshfix.clean_from_arrays(
+        #    mesh.trimesh_data.vertices, mesh.trimesh_data.faces)
+        # mesh.trimesh_data = Trimesh(vclean, fclean)
+        # print(
+        #    f"vertices {len(mesh.trimesh_data.vertices)} faces {len(mesh.trimesh_data.faces)}")
+        # print("pymeshfixed")
+        #pv_mesh = meshfix.mesh
+        # mesh.trimesh_data = Trimesh(
+        #    pv_mesh.points, pv_mesh.faces.reshape(-1, 4)[:, 1:])
+
+        # print(
+        #    f"vertices {len(mesh.trimesh_data.vertices)} faces {len(mesh.trimesh_data.faces)}")
+
         mesh.trimesh_data = mesh.trimesh_data.process(validate=True)
         mesh.trimesh_data.fill_holes()
 
-        pv_mesh = pv.wrap(mesh.trimesh_data)
-        to_probe = pv.create_grid(pv_mesh)
-        result = pv_mesh.sample(to_probe)
-
-        mesh.trimesh_data = Trimesh(
-            result.points, result.faces.reshape(-1, 4)[:, 1:])
-
         if len(mesh.trimesh_data.faces) < 1000:
-            print(mesh.filename, str(len(mesh.trimesh_data.faces)))
+            if len(mesh.trimesh_data.faces) == 0:
+                print("0 detected")
             while len(mesh.trimesh_data.faces) < 1000:
+                print(f"adding faces {len(mesh.trimesh_data.faces)}")
                 mesh.trimesh_data = mesh.trimesh_data.subdivide()
-                print(str(len(mesh.trimesh_data.faces)))
         if len(mesh.trimesh_data.faces) > 5000:
+            print(f"reducing faces {len(mesh.trimesh_data.faces)}")
             mesh.trimesh_data = simplify_mesh(mesh.trimesh_data)
+
+        # pv_mesh = pv.wrap(mesh.trimesh_data)
+        # pv_mesh = mf.MeshFix(pv_mesh)
+        # mesh.trimesh_data = Trimesh(pv_mesh.points(), pv_mesh.faces())
 
     return meshes
 

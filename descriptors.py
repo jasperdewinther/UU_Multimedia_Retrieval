@@ -21,15 +21,12 @@ def get_global_descriptors(meshes: list[mesh_data.MeshData]) -> list[mesh_data.M
         compactness = (surface_area**3) / (36*math.pi*(volume**2))
 
         # axis-aligned bounding-box volume
-        data = pd.read_csv(os.getcwd() + '/faces_vertices.csv', sep=',')
-        bounding_box = data['bounding box'][counter]
-        boxList = ast.literal_eval(bounding_box)
-        x1 = float(boxList[0])
-        y1 = float(boxList[1])
-        z1 = float(boxList[2])
-        x2 = float(boxList[3])
-        y2 = float(boxList[4])
-        z2 = float(boxList[5])
+        x1 = mesh.bounding_box[0]
+        y1 = mesh.bounding_box[1]
+        z1 = mesh.bounding_box[2]
+        x2 = mesh.bounding_box[3]
+        y2 = mesh.bounding_box[4]
+        z2 = mesh.bounding_box[5]
         bb_volume = abs(x2 - x1) * abs(y2 - y1) * abs(z2 - z1)
 
         # diameter

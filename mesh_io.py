@@ -12,7 +12,7 @@ def get_all_obj_files(folder: str) -> list[MeshData]:
     all_files = []
     for subdir, _, files in os.walk(folder):
         for file in files:
-            if file.endswith(".obj"):
+            if file.endswith(".off") or file.endswith(".obj"):
                 data = MeshData()
                 data.filename = subdir + '/' + file
                 all_files.append(data)
