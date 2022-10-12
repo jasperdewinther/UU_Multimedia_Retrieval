@@ -4,6 +4,7 @@ import numpy as np
 from numpy.typing import ArrayLike
 import decorators
 import filter_io
+import math
 
 
 def GetBaryCenter(mesh: Trimesh) -> ArrayLike:
@@ -19,11 +20,13 @@ def NormalizeTranslation(mesh: Trimesh):
 @decorators.cache_result
 def NormalizeTranslations(meshes: list[MeshData]) -> list[MeshData]:
     for mesh in meshes:
-        print(mesh.trimesh_data.centroid)
         baryCenter = GetBaryCenter(mesh.trimesh_data)
         for vertex in mesh.trimesh_data.vertices:
             vertex -= baryCenter
-        print(mesh.trimesh_data.centroid)
+        
+        d = math.sqrt(mesh.trimesh_data.centroid[0] ** 2 + mesh.trimesh_data.centroid[1] ** 2 + mesh.trimesh_data.centroid[2] ** 2)
+        if (d > .01):
+            print("distance", d)
 
     return meshes
 
@@ -70,33 +73,75 @@ def GetEigenValuesAndVectors(mesh: Trimesh) -> tuple[ArrayLike, ArrayLike]:
 @decorators.cache_result
 def NormalizeAlignments(meshes: list[MeshData]) -> list[MeshData]:
     for mesh in meshes:
-        eigenvectors = mesh.trimesh_data.principal_inertia_vectors
+        #print("old c: ", mesh.trimesh_data.centroid)
+        eigenvalues, eigenvectors = GetEigenValuesAndVectors(mesh.trimesh_data)
+        #eigenvectors = mesh.trimesh_data.principal_inertia_vectors
+        #eigenvalues = mesh.trimesh_data.principal_inertia_components
+
+        ordered_eigenvectors = []
+
+        if (eigenvalues[0] > eigenvalues[1]):
+            ordered_eigenvectors.append(eigenvectors[0])
+            ordered_eigenvectors.append(eigenvectors[1])
+        else:
+            ordered_eigenvectors.append(eigenvectors[1])
+            ordered_eigenvectors.append(eigenvectors[0])
+
+        if (eigenvalues[2] > eigenvalues[0]):
+            ordered_eigenvectors.insert(0, eigenvectors[2])
+        elif (eigenvalues[2] > eigenvalues[1]):
+            ordered_eigenvectors.insert(1, eigenvectors[2])
+        else:
+            ordered_eigenvectors.insert(2, eigenvectors[2])
 
         for vertex in mesh.trimesh_data.vertices:
             # print("old", vertex)
             new_vertex = [0, 0, 0]
-            new_vertex[0] = np.dot(vertex, eigenvectors[0])
-            new_vertex[1] = np.dot(vertex, eigenvectors[1])
-            new_vertex[2] = np.dot(vertex, np.cross(eigenvectors[0], eigenvectors[1]))
+            new_vertex[0] = np.dot(vertex, ordered_eigenvectors[0])
+            new_vertex[1] = np.dot(vertex, ordered_eigenvectors[1])
+            new_vertex[2] = np.dot(vertex, np.cross(ordered_eigenvectors[0], ordered_eigenvectors[1]))
 
             vertex[0] = new_vertex[0]
             vertex[1] = new_vertex[1]
             vertex[2] = new_vertex[2]
             # print("new", vertex)
 
+        #print("new c: ", mesh.trimesh_data.centroid)
+
+
     return meshes
 
 def NormalizeAlignment(mesh: MeshData) -> MeshData:
-    #eigenvalues, eigenvectors = GetEigenValuesAndVectors(mesh.trimesh_data)
+    eigenvalues, eigenvectors = GetEigenValuesAndVectors(mesh.trimesh_data)
+    #mesh.trimesh_data = mesh.trimesh_data.apply_transform(mesh.trimesh_data.principal_inertia_transform)
+    #eigenvectors = mesh.trimesh_data.principal_inertia_vectors
+    #eigenvalues = mesh.trimesh_data.principal_inertia_components
 
-    eigenvectors = mesh.trimesh_data.principal_inertia_vectors
+    ordered_eigenvectors = []
 
+    if (eigenvalues[0] > eigenvalues[1]):
+        ordered_eigenvectors.append(eigenvectors[0])
+        ordered_eigenvectors.append(eigenvectors[1])
+    else:
+        ordered_eigenvectors.append(eigenvectors[1])
+        ordered_eigenvectors.append(eigenvectors[0])
+
+    if (eigenvalues[2] > eigenvalues[0]):
+        ordered_eigenvectors.insert(0, eigenvectors[2])
+    elif (eigenvalues[2] > eigenvalues[1]):
+        ordered_eigenvectors.insert(1, eigenvectors[2])
+    else:
+        ordered_eigenvectors.insert(2, eigenvectors[2])
+
+    print("centroid: ", mesh.trimesh_data.centroid)
+    print("eigenvectors: \n", eigenvectors)
+    print("eigenvalues: ", eigenvalues)
     for vertex in mesh.trimesh_data.vertices:
         # print("old", vertex)
         new_vertex = [0, 0, 0]
-        new_vertex[0] = np.dot(vertex, eigenvectors[0])
-        new_vertex[1] = np.dot(vertex, eigenvectors[1])
-        new_vertex[2] = np.dot(vertex, np.cross(eigenvectors[0], eigenvectors[1]))
+        new_vertex[0] = np.dot(vertex, ordered_eigenvectors[0])
+        new_vertex[1] = np.dot(vertex, ordered_eigenvectors[1])
+        new_vertex[2] = np.dot(vertex, np.cross(ordered_eigenvectors[0], ordered_eigenvectors[1]))
 
         vertex[0] = new_vertex[0]
         vertex[1] = new_vertex[1]
