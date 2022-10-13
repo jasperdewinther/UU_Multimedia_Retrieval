@@ -7,6 +7,7 @@ from trimesh import Trimesh
 
 class MeshData:
     filename: str
+    mesh_class: str
     trimesh_data: Trimesh
     bounding_box: list[float]  # [x_min, y_min, z_min, x_max, y_max, z_max]
     vertex_count: int
@@ -19,6 +20,7 @@ class MeshData:
 
     def __init__(self):
         self.filename = ''
+        self.mesh_class = ''
         self.trimesh_data = None
         self.bounding_box = [0, 0, 0, 0, 0, 0]
         self.vertex_count = 0
@@ -33,11 +35,12 @@ class MeshData:
 pd.set_option('display.float_format', lambda x: '%.5f' % x)
 
 
-def summarize_data(meshes: list[MeshData]):
+def summarize_data(meshes: list[MeshData], figure_filename: str = None, csv_filename: str = None):
     df = pd.DataFrame()
     for mesh in meshes:
         data = {
             'filename': [mesh.filename],
+            'mesh_class': [mesh.mesh_class],
             'bbxmin': [mesh.bounding_box[0]],
             'bbymin': [mesh.bounding_box[1]],
             'bbzmin': [mesh.bounding_box[2]],
@@ -49,13 +52,17 @@ def summarize_data(meshes: list[MeshData]):
             'surface_area': [mesh.surface_area],
             'compactness': [mesh.compactness],
             'bb_volume': [mesh.bb_volume],
+            'diameter': [mesh.diameter],
             'broken_faces_count': [mesh.broken_faces_count]
         }
         df = pd.concat((pd.DataFrame.from_dict(data), df), ignore_index=True)
     print(df.describe())
     df.hist(bins=100, figsize=(20, 14))  # s is an instance of Series
-    plt.savefig('./figure.png')
-    plt.clf()
+    if figure_filename:
+        plt.savefig(figure_filename)
+        plt.clf()
+    if csv_filename:
+        df.to_csv(csv_filename)
 
 
 def generate_histogram(meshes: list[MeshData], bins: int, member: str) -> ArrayLike:

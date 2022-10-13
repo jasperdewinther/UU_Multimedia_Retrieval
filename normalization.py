@@ -3,7 +3,7 @@ from trimesh import Trimesh
 import numpy as np
 from numpy.typing import ArrayLike
 import decorators
-import filter_io
+import descriptors
 import math
 
 
@@ -16,6 +16,7 @@ def NormalizeTranslation(mesh: Trimesh):
     for vertex in mesh.vertices:
         vertex -= baryCenter
 
+
 @decorators.time_func
 @decorators.cache_result
 def NormalizeTranslations(meshes: list[MeshData]) -> list[MeshData]:
@@ -23,8 +24,9 @@ def NormalizeTranslations(meshes: list[MeshData]) -> list[MeshData]:
         baryCenter = GetBaryCenter(mesh.trimesh_data)
         for vertex in mesh.trimesh_data.vertices:
             vertex -= baryCenter
-        
-        d = math.sqrt(mesh.trimesh_data.centroid[0] ** 2 + mesh.trimesh_data.centroid[1] ** 2 + mesh.trimesh_data.centroid[2] ** 2)
+
+        d = math.sqrt(
+            mesh.trimesh_data.centroid[0] ** 2 + mesh.trimesh_data.centroid[1] ** 2 + mesh.trimesh_data.centroid[2] ** 2)
         if (d > .01):
             print("distance", d)
 
@@ -39,14 +41,16 @@ def GetBoundingBoxBiggestAxis(boundingbox: list[float]) -> float:
     if (max(Dx, Dy, Dz) is 0):
         print(boundingbox)
 
-        
     return max(Dx, Dy, Dz)
+
 
 @decorators.time_func
 @decorators.cache_result
 def NormalizeScales(meshes: list[MeshData]) -> list[MeshData]:
     for mesh in meshes:
-        scale_factor = 1 / GetBoundingBoxBiggestAxis(filter_io.get_bounding_box(mesh.trimesh_data))
+        scale_factor = 1 / \
+            GetBoundingBoxBiggestAxis(
+                descriptors.get_bounding_box(mesh.trimesh_data))
         for vertex in mesh.trimesh_data.vertices:
             vertex *= scale_factor
 
@@ -68,6 +72,7 @@ def GetEigenValuesAndVectors(mesh: Trimesh) -> tuple[ArrayLike, ArrayLike]:
     eigenvalues, eigenvectors = np.linalg.eig(A_cov)
 
     return eigenvalues, eigenvectors
+
 
 @decorators.time_func
 @decorators.cache_result
@@ -99,7 +104,8 @@ def NormalizeAlignments(meshes: list[MeshData]) -> list[MeshData]:
             new_vertex = [0, 0, 0]
             new_vertex[0] = np.dot(vertex, ordered_eigenvectors[0])
             new_vertex[1] = np.dot(vertex, ordered_eigenvectors[1])
-            new_vertex[2] = np.dot(vertex, np.cross(ordered_eigenvectors[0], ordered_eigenvectors[1]))
+            new_vertex[2] = np.dot(vertex, np.cross(
+                ordered_eigenvectors[0], ordered_eigenvectors[1]))
 
             vertex[0] = new_vertex[0]
             vertex[1] = new_vertex[1]
@@ -108,8 +114,8 @@ def NormalizeAlignments(meshes: list[MeshData]) -> list[MeshData]:
 
         #print("new c: ", mesh.trimesh_data.centroid)
 
-
     return meshes
+
 
 def NormalizeAlignment(mesh: MeshData) -> MeshData:
     eigenvalues, eigenvectors = GetEigenValuesAndVectors(mesh.trimesh_data)
@@ -141,7 +147,8 @@ def NormalizeAlignment(mesh: MeshData) -> MeshData:
         new_vertex = [0, 0, 0]
         new_vertex[0] = np.dot(vertex, ordered_eigenvectors[0])
         new_vertex[1] = np.dot(vertex, ordered_eigenvectors[1])
-        new_vertex[2] = np.dot(vertex, np.cross(ordered_eigenvectors[0], ordered_eigenvectors[1]))
+        new_vertex[2] = np.dot(vertex, np.cross(
+            ordered_eigenvectors[0], ordered_eigenvectors[1]))
 
         vertex[0] = new_vertex[0]
         vertex[1] = new_vertex[1]
@@ -149,4 +156,3 @@ def NormalizeAlignment(mesh: MeshData) -> MeshData:
         # print("new", vertex)
 
     return mesh
-
