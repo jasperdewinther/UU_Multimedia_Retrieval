@@ -17,12 +17,12 @@ if __name__ == "__main__":
     meshes = meshes[800:1000]
     meshes = mesh_io.get_all_meshes(meshes)  # sets trimesh_model field
     meshes = mesh_normalize.remesh_all_meshes(meshes)  # normalize mesh
-    meshes = filter_io.remove_degenerate_models(meshes)
     meshes = normalization.NormalizeTranslations(meshes)
     meshes = normalization.NormalizeScales(meshes)
     #meshes = normalization.NormalizeAlignments(meshes)
     meshes = filter_io.output_filter(meshes)  # determine details
     meshes = descriptors.get_global_descriptors(meshes)
+    meshes = filter_io.remove_degenerate_models(meshes, 0.9)  # keep 90%
     mesh_data.summarize_data(meshes)
 
     print(mesh_data.generate_histogram(meshes, 1000, 'broken_faces_count'))
