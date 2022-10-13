@@ -6,6 +6,8 @@ __pycache__/
 pickle_cache/
 .vs/
 figure.pdf
+*.png
+*.csv
 
 
 # C extensions
