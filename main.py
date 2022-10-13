@@ -13,7 +13,7 @@ import mesh_data
 
 if __name__ == "__main__":
     meshes = mesh_io.get_all_obj_files("./assets/")  # sets filename_field
-    meshes = meshes[600:800]
+    meshes = meshes[800:1000]
     meshes = mesh_io.get_all_meshes(meshes)  # sets trimesh_model field
     meshes = mesh_normalize.remesh_all_meshes(meshes)  # normalize mesh
     meshes = filter_io.remove_degenerate_models(meshes)
@@ -21,9 +21,9 @@ if __name__ == "__main__":
     meshes = descriptors.get_global_descriptors(meshes)
     mesh_data.summarize_data(meshes)
 
-    print(mesh_data.generate_histogram(meshes, 100, 'vertex_count'))
+    print(mesh_data.generate_histogram(meshes, 1000, 'broken_faces_count'))
     mesh_data.render_histogram(
-        meshes, 100, 'vertex_count', 'vertex_count_hist.png')
+        meshes, 1000, 'broken_faces_count', 'broken_faces_count_hist.png')
 
     torender = meshes
     for mesh in torender:

@@ -6,6 +6,7 @@ import numpy as np
 import decorators
 from mesh_data import MeshData
 import math
+import trimesh
 
 
 @decorators.time_func
@@ -20,9 +21,9 @@ def remove_degenerate_models(meshes: list[MeshData]) -> list[MeshData]:
         if meshes[i].trimesh_data.area <= 0 or meshes[i].trimesh_data.area == math.nan or abs(meshes[i].trimesh_data.area) == math.inf:
             meshes.pop(i)
             continue
-        if meshes[i].trimesh_data.is_watertight:
-            meshes.pop(i)
-            continue
+        # if meshes[i].trimesh_data.is_watertight:
+        #    meshes.pop(i)
+        #    continue
         i += 1
     print(len(meshes))
     return meshes
@@ -43,7 +44,8 @@ def output_filter(meshes: list[MeshData]) -> list[MeshData]:
         bounding_box = get_bounding_box(mesh.trimesh_data)
         writer.writerow([os.path.basename(mesh.filename), class_shape,
                         faces, vertices, triangles, quads, bounding_box])
-
+        mesh.broken_faces_count = len(
+            trimesh.repair.broken_faces(mesh.trimesh_data))
         mesh.vertex_count = vertices
         mesh.face_count = faces
         mesh.bounding_box = bounding_box
@@ -82,6 +84,7 @@ def get_face_type(mesh_file: str) -> Union[bool, bool]:
                 return triangles, quads
     return triangles, quads
 
+
 def get_bounding_box(mesh: Trimesh):
     bounding_box = [np.inf, np.inf, np.inf, -np.inf, -np.inf, -np.inf]
     for vertex in mesh.vertices:
@@ -97,6 +100,7 @@ def get_bounding_box(mesh: Trimesh):
             bounding_box[4] = vertex[1]
         if bounding_box[5] < vertex[2]:
             bounding_box[5] = vertex[2]
+
 
 def get_bounding_box(mesh: Trimesh) -> list[float]:
     # find bounding box of the shape

@@ -15,6 +15,7 @@ class MeshData:
     compactness: float
     bb_volume: float
     diameter: float
+    broken_faces_count: int
 
     def __init__(self):
         self.filename = ''
@@ -26,6 +27,7 @@ class MeshData:
         self.compactness = 0
         self.bb_volume = 0
         self.diameter = 0
+        self.broken_faces_count = 0
 
 
 pd.set_option('display.float_format', lambda x: '%.5f' % x)
@@ -46,7 +48,8 @@ def summarize_data(meshes: list[MeshData]):
             'face_count': [mesh.face_count],
             'surface_area': [mesh.surface_area],
             'compactness': [mesh.compactness],
-            'bb_volume': [mesh.bb_volume]
+            'bb_volume': [mesh.bb_volume],
+            'broken_faces_count': [mesh.broken_faces_count]
         }
         df = pd.concat((pd.DataFrame.from_dict(data), df), ignore_index=True)
     print(df.describe())
