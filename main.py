@@ -14,7 +14,7 @@ import normalization
 
 if __name__ == "__main__":
     meshes = mesh_io.get_all_obj_files("./assets/")  # sets filename_field
-    meshes = meshes[800:1000]
+    meshes = meshes[500:700]
     meshes = mesh_io.get_all_meshes(meshes)  # sets trimesh_model field
     meshes = mesh_normalize.remesh_all_meshes(meshes)  # normalize mesh
     meshes = normalization.NormalizeTranslations(meshes)
@@ -22,12 +22,14 @@ if __name__ == "__main__":
     #meshes = normalization.NormalizeAlignments(meshes)
     meshes = filter_io.output_filter(meshes)  # determine details
     meshes = descriptors.get_global_descriptors(meshes)
+    mesh_data.render_histogram(
+        meshes, 100, 'broken_faces_count', 'broken_faces_count_hist_before.png')
     meshes = filter_io.remove_degenerate_models(meshes, 0.9)  # keep 90%
+    mesh_data.render_histogram(
+        meshes, 100, 'broken_faces_count', 'broken_faces_count_hist_after.png')
     mesh_data.summarize_data(meshes)
 
     print(mesh_data.generate_histogram(meshes, 1000, 'broken_faces_count'))
-    mesh_data.render_histogram(
-        meshes, 1000, 'broken_faces_count', 'broken_faces_count_hist.png')
 
     torender = meshes
     for mesh in torender:

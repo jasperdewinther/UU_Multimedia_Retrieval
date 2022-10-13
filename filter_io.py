@@ -13,9 +13,8 @@ import trimesh
 @decorators.cache_result
 def remove_degenerate_models(meshes: list[MeshData], broken_face_fraction: float) -> list[MeshData]:
     i = 0
-    print(len(meshes))
     broken_faces = [mesh.broken_faces_count /
-                    mesh.vertex_count for mesh in meshes]
+                    mesh.face_count for mesh in meshes]
     broken_faces.sort()
     while i < len(meshes):
         # remove meshes which contain nan or inf values
@@ -25,15 +24,10 @@ def remove_degenerate_models(meshes: list[MeshData], broken_face_fraction: float
         if meshes[i].trimesh_data.area <= 0 or meshes[i].trimesh_data.area == math.nan or abs(meshes[i].trimesh_data.area) == math.inf:
             meshes.pop(i)
             continue
-        if meshes[i].broken_faces_count / meshes[i].vertex_count > broken_faces[int(len(broken_faces)*broken_face_fraction)]:
+        if meshes[i].broken_faces_count / meshes[i].face_count > broken_faces[int(len(broken_faces)*broken_face_fraction)]:
             meshes.pop(i)
             continue
-
-        # if meshes[i].trimesh_data.is_watertight:
-        #    meshes.pop(i)
-        #    continue
         i += 1
-    print(len(meshes))
     return meshes
 
 
