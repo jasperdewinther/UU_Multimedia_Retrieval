@@ -1,3 +1,4 @@
+import random
 import trimesh
 import mesh_data
 import math
@@ -46,6 +47,9 @@ def get_global_descriptors(meshes: list[mesh_data.MeshData]) -> list[mesh_data.M
         # eccentricity
         eigenvalues = mesh.trimesh_data.principal_inertia_components
         eccentricity = max(eigenvalues) - min(eigenvalues)
+
+        # shape properties
+        shape_properties = get_shape_properties(mesh)
 
         mesh.mesh_class = class_shape
         mesh.broken_faces_count = len(
@@ -101,10 +105,10 @@ def get_bounding_box(mesh: Trimesh) -> list[float]:
     return bounding_box
 
 
-def get_shape_properties(meshes: list[mesh_data.MeshData]) -> list[mesh_data.MeshData]:
+def get_shape_properties(mesh: mesh_data.MeshData) -> None:
     # finds A3, D1, D2, D3, D4
 
-    N = len(mesh.trimesh_data.vertices)
+    N = len(mesh.trimesh_data.vertices) - 1
 
     A3 = []
     D1 = []
@@ -115,15 +119,15 @@ def get_shape_properties(meshes: list[mesh_data.MeshData]) -> list[mesh_data.Mes
     # A3: angle between 3 random vertices
     n = 10000
     # compute number of samples along each of the three dimensions
-    k = pow(n, 1.0/3.0)
-    for i in k:
+    k = int(pow(n, 1.0/3.0))
+    for _ in range(k):
         # !!!!!!!!!!! lijst maken met alle vertices, als vertices gekozen verwijder hem uit de lijst
         vi = random.randint(0, N)
-        for j in k:
+        for _ in range(k):
             vj = random.randint(0, N)
             if (vj == vi):
                 continue  # do not allow duplicate points
-            for l in k:
+            for _ in range(k):
                 vl = random.randint(0, N)
                 if (vl == vj or vl == vi):
                     continue
@@ -132,10 +136,8 @@ def get_shape_properties(meshes: list[mesh_data.MeshData]) -> list[mesh_data.Mes
                 vertexj = mesh.trimesh_data.vertices[vj]
                 vertexl = mesh.trimesh_data.vertices[vl]
 
-                vector1 = [vertexi[0] - vertexj[0], vertexi[1] -
-                           vertexj[1], vertexi[2] - vertexj[2]]
-                vector2 = [vertexi[0] - vertexl[0], vertexi[1] -
-                           vertexl[1], vertexi[2] - vertexl[2]]
+                vector1 = vertexi - vertexj
+                vector2 = vertexi - vertexl
 
                 vector1_norm = np.linalg.norm(vector1)
                 vector2_norm = np.linalg.norm(vector2)
@@ -148,7 +150,7 @@ def get_shape_properties(meshes: list[mesh_data.MeshData]) -> list[mesh_data.Mes
 
     # D1: distance between barycenter and random vertex
     n = N
-    for i in k:
+    for _ in range(k):
         vi = random.randint(0, N)
 
         vertexi = mesh.trimesh_data.vertices[vi]
@@ -160,10 +162,10 @@ def get_shape_properties(meshes: list[mesh_data.MeshData]) -> list[mesh_data.Mes
     # D2: distance between 2 random vertices
     n = 10000
     # compute number of samples along each of the two dimensions
-    k = pow(n, 1.0/2.0)
-    for i in k:
+    k = int(pow(n, 1.0/2.0))
+    for _ in range(k):
         vi = random.randint(0, N)
-        for j in k:
+        for _ in range(k):
             vj = random.randint(0, N)
             if (vj == vi):
                 continue  # do not allow duplicate points
@@ -177,14 +179,14 @@ def get_shape_properties(meshes: list[mesh_data.MeshData]) -> list[mesh_data.Mes
     # D3: square root of area of triangle given by 3 random vertices
     n = 10000
     # compute number of samples along each of the three dimensions
-    k = pow(n, 1.0/3.0)
-    for i in k:
+    k = int(pow(n, 1.0/3.0))
+    for _ in range(k):
         vi = random.randint(0, N)
-        for j in k:
+        for _ in range(k):
             vj = random.randint(0, N)
             if (vj == vi):
                 continue  # do not allow duplicate points
-            for l in k:
+            for _ in range(k):
                 vl = random.randint(0, N)
                 if (vl == vj or vl == vi):
                     continue
@@ -193,12 +195,9 @@ def get_shape_properties(meshes: list[mesh_data.MeshData]) -> list[mesh_data.Mes
                 vertexj = mesh.trimesh_data.vertices[vj]
                 vertexl = mesh.trimesh_data.vertices[vl]
 
-                vector1 = [vertexi[0] - vertexj[0], vertexi[1] -
-                           vertexj[1], vertexi[2] - vertexj[2]]
-                vector2 = [vertexi[0] - vertexl[0], vertexi[1] -
-                           vertexl[1], vertexi[2] - vertexl[2]]
-                vector3 = [vertexj[0] - vertexl[0], vertexj[1] -
-                           vertexl[1], vertexj[2] - vertexl[2]]
+                vector1 = vertexi - vertexj
+                vector2 = vertexi - vertexl
+                vector3 = vertexj - vertexl
 
                 vector1_norm = np.linalg.norm(vector1)
                 vector2_norm = np.linalg.norm(vector2)
@@ -213,18 +212,18 @@ def get_shape_properties(meshes: list[mesh_data.MeshData]) -> list[mesh_data.Mes
     # D4: cube root of volume of tetrahedron formed by 4 random vertices
     n = 10000
     # compute number of samples along each of the three dimensions
-    k = pow(n, 1.0/4.0)
-    for i in k:
+    k = int(pow(n, 1.0/4.0))
+    for _ in range(k):
         vi = random.randint(0, N)
-        for j in k:
+        for _ in range(k):
             vj = random.randint(0, N)
             if (vj == vi):
                 continue  # do not allow duplicate points
-            for l in k:
+            for _ in range(k):
                 vl = random.randint(0, N)
                 if (vl == vj or vl == vi):
                     continue
-                for m in k:
+                for _ in range(k):
                     vm = random.randint(0, N)
                     if (vm == vl or vm == vj or vm == vi):
                         continue
@@ -237,3 +236,9 @@ def get_shape_properties(meshes: list[mesh_data.MeshData]) -> list[mesh_data.Mes
                     volume = np.linalg.det(
                         np.dot(vertexi - vertexm, np.cross(vertexj - vertexm, vertexl - vertexm)))/6
                     D4.append(volume**(1/3))
+    print(A3)
+    print(D1)
+    print(D2)
+    print(D3)
+    print(D4)
+    exit()
