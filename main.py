@@ -22,6 +22,10 @@ if __name__ == "__main__":
     # Load all meshes into ram
     meshes = mesh_io.get_all_meshes(meshes)
 
+    meshes = descriptors.get_global_descriptors(meshes)
+    mesh_data.summarize_data(
+        meshes, "before_histograms.png", "before_data.csv")
+
     # Remesh all meshes, change the number of faces to fit in range
     meshes = mesh_normalize.remesh_all_meshes(meshes, 1000, 5000)
 
@@ -44,7 +48,7 @@ if __name__ == "__main__":
     meshes = filter_io.remove_degenerate_models(meshes, 0.9)
 
     # Create histograms and database csv
-    mesh_data.summarize_data(meshes, "histograms.png", "data.csv")
+    mesh_data.summarize_data(meshes, "after_histograms.png", "after_data.csv")
 
     # Select meshes to render
     torender = meshes

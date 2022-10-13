@@ -13,7 +13,7 @@ from typing import Union
 @decorators.time_func
 @decorators.cache_result
 def get_global_descriptors(meshes: list[mesh_data.MeshData]) -> list[mesh_data.MeshData]:
-    # finds the surface area, compactness, axis-aligned boudning-box volume, diameter and eccentricity
+    # finds the surface area, compactness, axis-aligned bounding-box volume, diameter and eccentricity
     counter = 0
     for mesh in meshes:
         class_shape = get_class(mesh.filename)
@@ -45,6 +45,8 @@ def get_global_descriptors(meshes: list[mesh_data.MeshData]) -> list[mesh_data.M
         mesh.mesh_class = class_shape
         mesh.broken_faces_count = len(
             trimesh.repair.broken_faces(mesh.trimesh_data))
+        mesh.trimesh_data = Trimesh(
+            mesh.trimesh_data.vertices, mesh.trimesh_data.faces)
         mesh.vertex_count = vertices
         mesh.face_count = faces
         mesh.bounding_box = bounding_box

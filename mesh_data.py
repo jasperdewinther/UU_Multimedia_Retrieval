@@ -56,7 +56,6 @@ def summarize_data(meshes: list[MeshData], figure_filename: str = None, csv_file
             'broken_faces_count': [mesh.broken_faces_count]
         }
         df = pd.concat((pd.DataFrame.from_dict(data), df), ignore_index=True)
-    print(df.describe())
     df.hist(bins=100, figsize=(20, 14))  # s is an instance of Series
     if figure_filename:
         plt.savefig(figure_filename)

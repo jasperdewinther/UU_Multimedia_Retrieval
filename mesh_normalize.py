@@ -20,29 +20,6 @@ import numpy as np
 def remesh_all_meshes(meshes: list[MeshData], target_min: int, target_max: int) -> list[MeshData]:
     # load the mesh of every .obj file
     for mesh in meshes:
-        print(mesh.filename)
-        # print(
-        #    f"vertices {len(mesh.trimesh_data.vertices)} faces {len(mesh.trimesh_data.faces)}")
-        # pv_mesh = pv.wrap(mesh.trimesh_data)
-        # meshfix = mf.MeshFix(pv_mesh)
-        # meshfix.repair()
-        # to_probe = pv.create_grid(pv_mesh)
-        # result = pv_mesh.sample(to_probe)
-        # print(f"{mesh.filename}")
-        # print("pymeshfixing")
-        # vclean, fclean = pymeshfix.clean_from_arrays(
-        #    mesh.trimesh_data.vertices, mesh.trimesh_data.faces)
-        # mesh.trimesh_data = Trimesh(vclean, fclean)
-        # print(
-        #    f"vertices {len(mesh.trimesh_data.vertices)} faces {len(mesh.trimesh_data.faces)}")
-        # print("pymeshfixed")
-        # pv_mesh = meshfix.mesh
-        # mesh.trimesh_data = Trimesh(
-        #    pv_mesh.points, pv_mesh.faces.reshape(-1, 4)[:, 1:])
-
-        # print(
-        #    f"vertices {len(mesh.trimesh_data.vertices)} faces {len(mesh.trimesh_data.faces)}")
-
         mesh.trimesh_data = mesh.trimesh_data.process(validate=True)
         mesh.trimesh_data.fill_holes()
 
@@ -51,10 +28,6 @@ def remesh_all_meshes(meshes: list[MeshData], target_min: int, target_max: int) 
                 mesh.trimesh_data = mesh.trimesh_data.subdivide()
         if len(mesh.trimesh_data.faces) > target_max:
             mesh.trimesh_data = simplify_mesh(mesh.trimesh_data, target_max)
-
-        # pv_mesh = pv.wrap(mesh.trimesh_data)
-        # pv_mesh = mf.MeshFix(pv_mesh)
-        # mesh.trimesh_data = Trimesh(pv_mesh.points(), pv_mesh.faces())
 
     return meshes
 
