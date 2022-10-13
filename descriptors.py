@@ -3,11 +3,14 @@ import mesh_data
 import math
 import ast
 from trimesh import Trimesh
+from scipy.spatial import ConvexHull
+from scipy.spatial.distance import cdist
 import numpy as np
 import pandas as pd
 import os
 import decorators
 from typing import Union
+import time
 
 
 @decorators.time_func
@@ -28,19 +31,21 @@ def get_global_descriptors(meshes: list[mesh_data.MeshData]) -> list[mesh_data.M
         compactness = (surface_area**3) / (36*math.pi*(volume**2))
 
         # axis-aligned bounding-box volume
-        x1 = bounding_box[0]
-        y1 = bounding_box[1]
-        z1 = bounding_box[2]
-        x2 = bounding_box[3]
-        y2 = bounding_box[4]
-        z2 = bounding_box[5]
-        bb_volume = abs(x2 - x1) * abs(y2 - y1) * abs(z2 - z1)
+        aabb_volume = mesh.trimesh_data.bounding_box.volume
+        obb_volume = mesh.trimesh_data.bounding_box_oriented.volume
 
-        # diameter
-        diameter = max(x2 - x1, y2 - y1, z2 - z1)
+        # diameter according to https://stackoverflow.com/a/60955825
+        hull = ConvexHull(mesh.trimesh_data.vertices)
+        hullpoints = mesh.trimesh_data.vertices[hull.vertices, :]
+        hdist = cdist(hullpoints,
+                      hullpoints, metric='euclidean')
+        bestpair = np.unravel_index(hdist.argmax(), hdist.shape)
+        diameter = math.dist(
+            hullpoints[bestpair[0]], hullpoints[bestpair[1]])
 
         # eccentricity
-        eccentricity = 0
+        eigenvalues = mesh.trimesh_data.principal_inertia_components
+        eccentricity = max(eigenvalues) - min(eigenvalues)
 
         mesh.mesh_class = class_shape
         mesh.broken_faces_count = len(
@@ -52,7 +57,8 @@ def get_global_descriptors(meshes: list[mesh_data.MeshData]) -> list[mesh_data.M
         mesh.bounding_box = bounding_box
         mesh.surface_area = surface_area
         mesh.compactness = compactness
-        mesh.bb_volume = bb_volume
+        mesh.aabb_volume = aabb_volume
+        mesh.obb_volume = obb_volume
         mesh.diameter = diameter
         mesh.eccentricity = eccentricity
 
@@ -93,3 +99,141 @@ def get_bounding_box(mesh: Trimesh) -> list[float]:
         if bounding_box[5] < vertex[2]:
             bounding_box[5] = vertex[2]
     return bounding_box
+
+
+def get_shape_properties(meshes: list[mesh_data.MeshData]) -> list[mesh_data.MeshData]:
+    # finds A3, D1, D2, D3, D4
+
+    N = len(mesh.trimesh_data.vertices)
+
+    A3 = []
+    D1 = []
+    D2 = []
+    D3 = []
+    D4 = []
+
+    # A3: angle between 3 random vertices
+    n = 10000
+    # compute number of samples along each of the three dimensions
+    k = pow(n, 1.0/3.0)
+    for i in k:
+        # !!!!!!!!!!! lijst maken met alle vertices, als vertices gekozen verwijder hem uit de lijst
+        vi = random.randint(0, N)
+        for j in k:
+            vj = random.randint(0, N)
+            if (vj == vi):
+                continue  # do not allow duplicate points
+            for l in k:
+                vl = random.randint(0, N)
+                if (vl == vj or vl == vi):
+                    continue
+
+                vertexi = mesh.trimesh_data.vertices[vi]
+                vertexj = mesh.trimesh_data.vertices[vj]
+                vertexl = mesh.trimesh_data.vertices[vl]
+
+                vector1 = [vertexi[0] - vertexj[0], vertexi[1] -
+                           vertexj[1], vertexi[2] - vertexj[2]]
+                vector2 = [vertexi[0] - vertexl[0], vertexi[1] -
+                           vertexl[1], vertexi[2] - vertexl[2]]
+
+                vector1_norm = np.linalg.norm(vector1)
+                vector2_norm = np.linalg.norm(vector2)
+
+                unit_vector1 = vector1 / vector1_norm
+                unit_vector2 = vector2 / vector2_norm
+
+                angle = np.arccos(np.dot(unit_vector1, unit_vector2))
+                A3.append(angle)
+
+    # D1: distance between barycenter and random vertex
+    n = N
+    for i in k:
+        vi = random.randint(0, N)
+
+        vertexi = mesh.trimesh_data.vertices[vi]
+
+        distance_bc = abs(
+            math.dist(vertexi, mesh.trimesh_data.centroid))  # barycenter?
+        D1.append(distance_bc)
+
+    # D2: distance between 2 random vertices
+    n = 10000
+    # compute number of samples along each of the two dimensions
+    k = pow(n, 1.0/2.0)
+    for i in k:
+        vi = random.randint(0, N)
+        for j in k:
+            vj = random.randint(0, N)
+            if (vj == vi):
+                continue  # do not allow duplicate points
+
+            vertexi = mesh.trimesh_data.vertices[vi]
+            vertexj = mesh.trimesh_data.vertices[vj]
+
+            distance_vertices = abs(math.dist(vertexi, vertexj))
+            D2.append(distance_vertices)
+
+    # D3: square root of area of triangle given by 3 random vertices
+    n = 10000
+    # compute number of samples along each of the three dimensions
+    k = pow(n, 1.0/3.0)
+    for i in k:
+        vi = random.randint(0, N)
+        for j in k:
+            vj = random.randint(0, N)
+            if (vj == vi):
+                continue  # do not allow duplicate points
+            for l in k:
+                vl = random.randint(0, N)
+                if (vl == vj or vl == vi):
+                    continue
+
+                vertexi = mesh.trimesh_data.vertices[vi]
+                vertexj = mesh.trimesh_data.vertices[vj]
+                vertexl = mesh.trimesh_data.vertices[vl]
+
+                vector1 = [vertexi[0] - vertexj[0], vertexi[1] -
+                           vertexj[1], vertexi[2] - vertexj[2]]
+                vector2 = [vertexi[0] - vertexl[0], vertexi[1] -
+                           vertexl[1], vertexi[2] - vertexl[2]]
+                vector3 = [vertexj[0] - vertexl[0], vertexj[1] -
+                           vertexl[1], vertexj[2] - vertexl[2]]
+
+                vector1_norm = np.linalg.norm(vector1)
+                vector2_norm = np.linalg.norm(vector2)
+                vector3_norm = np.linalg.norm(vector3)
+
+                semiperimeter = (
+                    vector1_norm + vector2_norm + vector3_norm) / 2
+                area = (semiperimeter * (semiperimeter - vector1_norm) *
+                        (semiperimeter - vector2_norm) * (semiperimeter - vector3_norm))**(1/2)
+                D3.append(area**(1/2))
+
+    # D4: cube root of volume of tetrahedron formed by 4 random vertices
+    n = 10000
+    # compute number of samples along each of the three dimensions
+    k = pow(n, 1.0/4.0)
+    for i in k:
+        vi = random.randint(0, N)
+        for j in k:
+            vj = random.randint(0, N)
+            if (vj == vi):
+                continue  # do not allow duplicate points
+            for l in k:
+                vl = random.randint(0, N)
+                if (vl == vj or vl == vi):
+                    continue
+                for m in k:
+                    vm = random.randint(0, N)
+                    if (vm == vl or vm == vj or vm == vi):
+                        continue
+
+                    vertexi = mesh.trimesh_data.vertices[vi]
+                    vertexj = mesh.trimesh_data.vertices[vj]
+                    vertexl = mesh.trimesh_data.vertices[vl]
+                    vertexm = mesh.trimesh_data.vertices[vm]
+
+                    volume = np.linalg.det(
+                        np.dot(vertexi - vertexm, np.cross(vertexj - vertexm, vertexl - vertexm)))/6
+                    D4.append(volume**(1/3))

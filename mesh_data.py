@@ -14,7 +14,8 @@ class MeshData:
     face_count: int
     surface_area: float
     compactness: float
-    bb_volume: float
+    aabb_volume: float
+    obb_volume: float
     diameter: float
     broken_faces_count: int
 
@@ -27,7 +28,8 @@ class MeshData:
         self.face_count = 0
         self.surface_area = 0
         self.compactness = 0
-        self.bb_volume = 0
+        self.aabb_volume = 0
+        self.obb_volume = 0
         self.diameter = 0
         self.broken_faces_count = 0
 
@@ -51,7 +53,8 @@ def summarize_data(meshes: list[MeshData], figure_filename: str = None, csv_file
             'face_count': [mesh.face_count],
             'surface_area': [mesh.surface_area],
             'compactness': [mesh.compactness],
-            'bb_volume': [mesh.bb_volume],
+            'aabb_volume': [mesh.aabb_volume],
+            'obb_volume': [mesh.obb_volume],
             'diameter': [mesh.diameter],
             'broken_faces_count': [mesh.broken_faces_count]
         }
