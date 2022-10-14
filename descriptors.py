@@ -49,7 +49,7 @@ def get_global_descriptors(meshes: list[mesh_data.MeshData]) -> list[mesh_data.M
         eccentricity = max(eigenvalues) - min(eigenvalues)
 
         # shape properties
-        shape_properties = get_shape_properties(mesh)
+        #shape_properties = get_shape_properties(mesh)
 
         mesh.mesh_class = class_shape
         mesh.broken_faces_count = len(
