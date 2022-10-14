@@ -20,12 +20,13 @@ def cache_result(func: Callable) -> Callable:
     @wraps(func)
     def wrapped(*args, **kwargs):
         if hasattr(wrapped, "has_run"):
-            raise Exception(
-                f"{func.__name__} cache function was called twice, this should not be possible")
+            wrapped.has_run += 1
+            # raise Exception(
+            #    f"{func.__name__} cache function was called twice, this should not be possible")
         else:
-            wrapped.has_run = True
+            wrapped.has_run = 1
 
-        pickle_file = f'./pickle_cache/{func.__name__}.pickle'
+        pickle_file = f'./pickle_cache/{func.__name__}_{wrapped.has_run}.pickle'
         os.makedirs(os.path.dirname(pickle_file), exist_ok=True)
         if os.path.isfile(pickle_file):
             # check if cached

@@ -13,26 +13,47 @@ import normalization
 
 
 if __name__ == "__main__":
-    meshes = mesh_io.get_all_obj_files("./assets/")  # sets filename_field
-    meshes = meshes[600:800]
-    meshes = mesh_io.get_all_meshes(meshes)  # sets trimesh_model field
-    meshes = mesh_normalize.remesh_all_meshes(meshes)  # normalize mesh
-    meshes = filter_io.remove_degenerate_models(meshes)
-    meshes = normalization.NormalizeTranslations(meshes)
-    meshes = normalization.NormalizeScales(meshes)
-    #meshes = normalization.NormalizeAlignments(meshes)
-    meshes = filter_io.output_filter(meshes)  # determine details
+    # Find all files
+    meshes = mesh_io.get_all_obj_files("./assets/")
+
+    # Reduce dataset for faster computation
+    meshes = meshes[500:700]
+
+    # Load all meshes into ram
+    meshes = mesh_io.get_all_meshes(meshes)
+
     meshes = descriptors.get_global_descriptors(meshes)
-    mesh_data.summarize_data(meshes)
+    mesh_data.summarize_data(
+        meshes, "before_histograms.png", "before_data.csv")
 
-    print(mesh_data.generate_histogram(meshes, 100, 'vertex_count'))
-    mesh_data.render_histogram(
-        meshes, 100, 'vertex_count', 'vertex_count_hist.png')
+    # Remesh all meshes, change the number of faces to fit in range
+    meshes = mesh_normalize.remesh_all_meshes(meshes, 1000, 5000)
 
+    # Normalize the location
+    meshes = normalization.NormalizeTranslations(meshes)
+
+    # Normalize the object scale
+    meshes = normalization.NormalizeScales(meshes)
+
+    # Normalize object alignment
+    #meshes = normalization.NormalizeAlignments(meshes)
+
+    # Calculate global descriptor
+    meshes = descriptors.get_global_descriptors(meshes)
+
+    # mesh_data.render_histogram(
+    #    meshes, 100, 'broken_faces_count', 'broken_faces_count_hist_before.png')
+
+    # Remove meshes which contain nan or inf values and throw away a portion of the dataset with the highest ratio of broken faces
+    meshes = filter_io.remove_degenerate_models(meshes, 0.9)
+
+    # Create histograms and database csv
+    mesh_data.summarize_data(meshes, "after_histograms.png", "after_data.csv")
+
+    # Select meshes to render
     torender = meshes
-    for mesh in torender:
-        print(mesh.filename, "vertex count:", str(
-            mesh.vertex_count), "face count:", str(mesh.face_count))
+
+    # Render selected meshes
     renderer.render_meshes(torender)
 
     window = initGUI()
