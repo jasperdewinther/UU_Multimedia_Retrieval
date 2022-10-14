@@ -20,7 +20,7 @@ def render_meshes(meshes: list[MeshData]):
         node.matrix = position
 
     # set the camera settings
-    cam = pyrender.PerspectiveCamera(yfov=np.pi / 3.0, aspectRatio=1.414)
+    cam = pyrender.PerspectiveCamera(yfov=np.pi / 3.0, aspectRatio=1)
     nc = pyrender.Node(camera=cam, matrix=np.eye(4))
     scene.add_node(nc)
 

@@ -49,7 +49,7 @@ def get_global_descriptors(meshes: list[mesh_data.MeshData]) -> list[mesh_data.M
         eccentricity = max(eigenvalues) - min(eigenvalues)
 
         # shape properties
-        #shape_properties = get_shape_properties(mesh)
+        # shape_properties = get_shape_properties(mesh)
 
         mesh.mesh_class = class_shape
         mesh.broken_faces_count = len(
@@ -233,12 +233,12 @@ def get_shape_properties(mesh: mesh_data.MeshData) -> None:
                     vertexl = mesh.trimesh_data.vertices[vl]
                     vertexm = mesh.trimesh_data.vertices[vm]
 
-                    volume = np.linalg.det(
+                    volume = np.abs(
                         np.dot(vertexi - vertexm, np.cross(vertexj - vertexm, vertexl - vertexm)))/6
                     D4.append(volume**(1/3))
-    print(A3)
-    print(D1)
-    print(D2)
-    print(D3)
-    print(D4)
-    exit()
+    # print(A3)
+    # print(D1)
+    # print(D2)
+    # print(D3)
+    # print(D4)
+    # exit()
