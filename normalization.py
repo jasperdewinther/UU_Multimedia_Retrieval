@@ -79,20 +79,28 @@ def NormalizeAlignments(meshes: list[MeshData]) -> list[MeshData]:
         #eigenvalues = mesh.trimesh_data.principal_inertia_components
 
         ordered_eigenvectors = []
+        ordered_eigenvalues = []
 
         if (eigenvalues[0] > eigenvalues[1]):
             ordered_eigenvectors.append(eigenvectors[0])
             ordered_eigenvectors.append(eigenvectors[1])
+            ordered_eigenvalues.append(eigenvalues[0])
+            ordered_eigenvalues.append(eigenvalues[1])
         else:
             ordered_eigenvectors.append(eigenvectors[1])
             ordered_eigenvectors.append(eigenvectors[0])
+            ordered_eigenvalues.append(eigenvalues[1])
+            ordered_eigenvalues.append(eigenvalues[0])
 
-        if (eigenvalues[2] > eigenvalues[0]):
+        if (eigenvalues[2] > ordered_eigenvalues[0]):
             ordered_eigenvectors.insert(0, eigenvectors[2])
-        elif (eigenvalues[2] > eigenvalues[1]):
+            ordered_eigenvalues.insert(0, eigenvalues[2])
+        elif (eigenvalues[2] > ordered_eigenvalues[1]):
             ordered_eigenvectors.insert(1, eigenvectors[2])
+            ordered_eigenvalues.insert(1, eigenvalues[2])
         else:
             ordered_eigenvectors.insert(2, eigenvectors[2])
+            ordered_eigenvalues.insert(2, eigenvalues[2])
 
         for vertex in mesh.trimesh_data.vertices:
             # print("old", vertex)
@@ -118,20 +126,28 @@ def NormalizeAlignment(mesh: MeshData) -> MeshData:
     #eigenvalues = mesh.trimesh_data.principal_inertia_components
 
     ordered_eigenvectors = []
+    ordered_eigenvalues = []
 
     if (eigenvalues[0] > eigenvalues[1]):
         ordered_eigenvectors.append(eigenvectors[0])
         ordered_eigenvectors.append(eigenvectors[1])
+        ordered_eigenvalues.append(eigenvalues[0])
+        ordered_eigenvalues.append(eigenvalues[1])
     else:
         ordered_eigenvectors.append(eigenvectors[1])
         ordered_eigenvectors.append(eigenvectors[0])
-
-    if (eigenvalues[2] > eigenvalues[0]):
+        ordered_eigenvalues.append(eigenvalues[1])
+        ordered_eigenvalues.append(eigenvalues[0]) 
+    if (eigenvalues[2] > ordered_eigenvalues[0]):
         ordered_eigenvectors.insert(0, eigenvectors[2])
-    elif (eigenvalues[2] > eigenvalues[1]):
+        ordered_eigenvalues.insert(0, eigenvalues[2])
+    elif (eigenvalues[2] > ordered_eigenvalues[1]):
         ordered_eigenvectors.insert(1, eigenvectors[2])
+        ordered_eigenvalues.insert(1, eigenvalues[2])
     else:
         ordered_eigenvectors.insert(2, eigenvectors[2])
+        ordered_eigenvalues.insert(2, eigenvalues[2])
+
 
     print("centroid: ", mesh.trimesh_data.centroid)
     print("eigenvectors: \n", eigenvectors)
