@@ -16,6 +16,9 @@ def time_func(func: Callable) -> Callable:
     return wrapped
 
 
+cache_count = 0
+
+
 def cache_result(func: Callable) -> Callable:
     @wraps(func)
     def wrapped(*args, **kwargs):
@@ -25,8 +28,10 @@ def cache_result(func: Callable) -> Callable:
             #    f"{func.__name__} cache function was called twice, this should not be possible")
         else:
             wrapped.has_run = 1
+        global cache_count
+        pickle_file = f'./pickle_cache/{cache_count}_{func.__name__}_{wrapped.has_run}.pickle'
+        cache_count += 1
 
-        pickle_file = f'./pickle_cache/{func.__name__}_{wrapped.has_run}.pickle'
         os.makedirs(os.path.dirname(pickle_file), exist_ok=True)
         if os.path.isfile(pickle_file):
             # check if cached
