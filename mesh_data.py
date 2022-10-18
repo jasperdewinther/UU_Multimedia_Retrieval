@@ -64,12 +64,12 @@ def summarize_data(meshes: list[MeshData], figure_filename: str = None, csv_file
         data = {
             'filename': [mesh.filename],
             'mesh_class': [mesh.mesh_class],
-            'bbxmin': [mesh.bounding_box[0]],
-            'bbymin': [mesh.bounding_box[1]],
-            'bbzmin': [mesh.bounding_box[2]],
-            'bbxmax': [mesh.bounding_box[3]],
-            'bbymax': [mesh.bounding_box[4]],
-            'bbzmax': [mesh.bounding_box[5]],
+            # 'bbxmin': [mesh.bounding_box[0]],
+            # 'bbymin': [mesh.bounding_box[1]],
+            # 'bbzmin': [mesh.bounding_box[2]],
+            # 'bbxmax': [mesh.bounding_box[3]],
+            # 'bbymax': [mesh.bounding_box[4]],
+            # 'bbzmax': [mesh.bounding_box[5]],
             'vertex_count': [mesh.vertex_count],
             'face_count': [mesh.face_count],
             'surface_area': [mesh.surface_area],
@@ -81,6 +81,7 @@ def summarize_data(meshes: list[MeshData], figure_filename: str = None, csv_file
         }
         df = pd.concat((pd.DataFrame.from_dict(data), df), ignore_index=True)
     df.hist(bins=100, figsize=(20, 14))  # s is an instance of Series
+    print(df.describe())
     if figure_filename:
         plt.savefig(figure_filename)
         plt.clf()
