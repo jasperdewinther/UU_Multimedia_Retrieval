@@ -1,3 +1,4 @@
+import math
 from numpy.typing import ArrayLike
 import numpy as np
 import matplotlib.pyplot as plt
@@ -19,6 +20,7 @@ class MeshData:
     obb_volume: float
     diameter: float
     broken_faces_count: int
+    barycenter_dist_to_origin: float
     A3: ArrayLike
     A3_binsize: ArrayLike
     D1: ArrayLike
@@ -31,8 +33,8 @@ class MeshData:
     D4_binsize: ArrayLike
 
     def __init__(self):
-        self.filename = ''
-        self.mesh_class = ''
+        self.filename = ""
+        self.mesh_class = ""
         self.trimesh_data = None
         self.bounding_box = [0, 0, 0, 0, 0, 0]
         self.vertex_count = 0
@@ -43,6 +45,7 @@ class MeshData:
         self.obb_volume = 0
         self.diameter = 0
         self.broken_faces_count = 0
+        self.barycenter_dist_to_origin = 0
         self.A3 = np.zeros(0)
         self.A3_binsize = np.zeros(0)
         self.D1 = np.zeros(0)
@@ -55,33 +58,35 @@ class MeshData:
         self.D4_binsize = np.zeros(0)
 
 
-pd.set_option('display.float_format', lambda x: '%.5f' % x)
+pd.set_option("display.float_format", lambda x: "{:.3e}".format(x) if x > 999999 or x < 0.01 else "{:.3f}".format(x))
 
 
 def summarize_data(meshes: list[MeshData], figure_filename: str = None, csv_filename: str = None):
     df = pd.DataFrame()
     for mesh in meshes:
         data = {
-            'filename': [mesh.filename],
-            'mesh_class': [mesh.mesh_class],
+            "filename": [mesh.filename],
+            "mesh_class": [mesh.mesh_class],
             # 'bbxmin': [mesh.bounding_box[0]],
             # 'bbymin': [mesh.bounding_box[1]],
             # 'bbzmin': [mesh.bounding_box[2]],
             # 'bbxmax': [mesh.bounding_box[3]],
             # 'bbymax': [mesh.bounding_box[4]],
             # 'bbzmax': [mesh.bounding_box[5]],
-            'vertex_count': [mesh.vertex_count],
-            'face_count': [mesh.face_count],
-            'surface_area': [mesh.surface_area],
-            'compactness': [mesh.compactness],
-            'aabb_volume': [mesh.aabb_volume],
-            'obb_volume': [mesh.obb_volume],
-            'diameter': [mesh.diameter],
-            'broken_faces_count': [mesh.broken_faces_count]
+            "vertex_count": [mesh.vertex_count],
+            "face_count": [mesh.face_count],
+            "surface_area": [mesh.surface_area],
+            "compactness": [mesh.compactness],
+            "aabb_volume": [mesh.aabb_volume],
+            "obb_volume": [mesh.obb_volume],
+            "diameter": [mesh.diameter],
+            "broken_faces_count": [mesh.broken_faces_count],
+            "barycenter_dist_to_origin": [mesh.barycenter_dist_to_origin],
         }
         df = pd.concat((pd.DataFrame.from_dict(data), df), ignore_index=True)
     df.hist(bins=100, figsize=(20, 14))  # s is an instance of Series
-    print(df.describe())
+    df.round(3)
+    print(df.describe().to_latex())
     if figure_filename:
         plt.savefig(figure_filename)
         plt.clf()

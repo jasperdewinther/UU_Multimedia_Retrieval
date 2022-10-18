@@ -28,8 +28,7 @@ if __name__ == "__main__":
     meshes = descriptors.get_global_descriptors(meshes, 10000)
 
     mesh_data.render_class_histograms(meshes, "histograms/")
-    mesh_data.summarize_data(
-        meshes, "before_histograms.png", "before_data.csv")
+    mesh_data.summarize_data(meshes, "before_histograms.png", "before_data.csv")
 
     # Remesh all meshes, change the number of faces to fit in range
     meshes = mesh_normalize.remesh_all_meshes(meshes, 1000, 5000)
@@ -41,7 +40,7 @@ if __name__ == "__main__":
     meshes = normalization.NormalizeScales(meshes)
 
     # Normalize object alignment
-    #meshes = normalization.NormalizeAlignments(meshes)
+    # meshes = normalization.NormalizeAlignments(meshes)
 
     # Calculate global descriptor
     meshes = descriptors.get_global_descriptors(meshes, 10000)
@@ -61,12 +60,12 @@ if __name__ == "__main__":
     torender = meshes
 
     # Render selected meshes
-    renderer.render_meshes(torender)
+    renderer.render_meshes([torender[0]])
 
     window = initGUI()
 
-   # while True:                             # The Event Loop
-    #    if not HandleGUIEvents(window):
-    #        break
+# while True:                             # The Event Loop
+#    if not HandleGUIEvents(window):
+#        break
 
-    # window.close()
+# window.close()

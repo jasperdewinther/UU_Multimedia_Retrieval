@@ -34,10 +34,8 @@ def remesh_all_meshes(meshes: list[MeshData], target_min: int, target_max: int) 
 
 def simplify_mesh(mesh: Trimesh, target_max: int) -> Trimesh:
     mesh_simplifier = pyfqmr.Simplify()
-    mesh_simplifier.setMesh(
-        mesh.vertices, mesh.faces)
-    mesh_simplifier.simplify_mesh(
-        target_count=target_max, verbose=0)
+    mesh_simplifier.setMesh(mesh.vertices, mesh.faces)
+    mesh_simplifier.simplify_mesh(target_count=target_max, verbose=0)
     vertices, faces, normals = mesh_simplifier.getMesh()
     new_mesh = Trimesh(vertices, faces, normals)
     return new_mesh
@@ -66,14 +64,12 @@ def fan_holes(mesh: Trimesh) -> Trimesh:
     edges_with_connection = {}
     for edge in edges:
         if edge[0] in edges_with_connection:
-            edges_with_connection[edge[0]
-                                  ] = edges_with_connection[edge[0]] + [edge[1]]
+            edges_with_connection[edge[0]] = edges_with_connection[edge[0]] + [edge[1]]
         else:
             edges_with_connection[edge[0]] = [edge[1]]
 
         if edge[1] in edges_with_connection:
-            edges_with_connection[edge[1]
-                                  ] = edges_with_connection[edge[1]] + [edge[0]]
+            edges_with_connection[edge[1]] = edges_with_connection[edge[1]] + [edge[0]]
         else:
             edges_with_connection[edge[1]] = [edge[0]]
 
@@ -92,7 +88,7 @@ def fan_holes(mesh: Trimesh) -> Trimesh:
             path.append(current)
             candidate_next = edges_with_connection.pop(current)
 
-            #print(current, previous, candidate_next)
+            # print(current, previous, candidate_next)
             candidate_next = candidate_next[0] if candidate_next[1] == previous else candidate_next[1]
             previous = current
             current = candidate_next
@@ -110,14 +106,14 @@ def fan_holes(mesh: Trimesh) -> Trimesh:
 
         edge_centroids = []
         lengths = []
-        for i in range(points_count-1):
+        for i in range(points_count - 1):
             vertex1 = mesh.vertices[path[i]]
-            vertex2 = mesh.vertices[path[i+1]]
-            distance = np.linalg.norm(vertex1-vertex2)
-            edge_centroids.append((vertex1+vertex2)/2)
+            vertex2 = mesh.vertices[path[i + 1]]
+            distance = np.linalg.norm(vertex1 - vertex2)
+            edge_centroids.append((vertex1 + vertex2) / 2)
             lengths.append(distance)
             total_length += distance
-        centroid = np.array((0, 0, 0), dtype='float64')
+        centroid = np.array((0, 0, 0), dtype="float64")
         for i in range(len(edge_centroids)):
             centroid += edge_centroids[i]
         centroid /= points_count
@@ -125,18 +121,14 @@ def fan_holes(mesh: Trimesh) -> Trimesh:
         to_add_vertices.append(centroid)
 
         # create fan
-        for i in range(points_count-1):
+        for i in range(points_count - 1):
             vertex1 = path[i]
-            vertex2 = path[i+1]
-            vertex3 = len(mesh.vertices) + \
-                len(to_add_vertices) - 1
-            to_add_indices.append(
-                np.array((vertex3, vertex1, vertex2)))
+            vertex2 = path[i + 1]
+            vertex3 = len(mesh.vertices) + len(to_add_vertices) - 1
+            to_add_indices.append(np.array((vertex3, vertex1, vertex2)))
 
-    new_vertices = np.concatenate(
-        (mesh.vertices, to_add_vertices), axis=0)
-    new_faces = np.concatenate(
-        (mesh.faces, to_add_indices), axis=0)
+    new_vertices = np.concatenate((mesh.vertices, to_add_vertices), axis=0)
+    new_faces = np.concatenate((mesh.faces, to_add_indices), axis=0)
     new_mesh = Trimesh(new_vertices, new_faces)
     print("fan successful")
     return new_mesh
