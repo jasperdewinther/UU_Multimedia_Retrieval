@@ -65,6 +65,7 @@ def get_global_descriptors(meshes: list[mesh_data.MeshData], descriptor_iteratio
         mesh.compactness = compactness
         mesh.aabb_volume = aabb_volume
         mesh.obb_volume = obb_volume
+        mesh.rectangularity = volume / obb_volume
         mesh.diameter = diameter
         mesh.eccentricity = eccentricity
         mesh.barycenter_dist_to_origin = math.dist([0, 0, 0], mesh.trimesh_data.centroid)

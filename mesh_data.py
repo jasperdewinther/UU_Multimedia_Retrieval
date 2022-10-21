@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 from trimesh import Trimesh
 import os
+import decorators
 
 
 class MeshData:
@@ -18,7 +19,9 @@ class MeshData:
     compactness: float
     aabb_volume: float
     obb_volume: float
+    rectangularity: float
     diameter: float
+    eccentricity: float
     broken_faces_count: int
     barycenter_dist_to_origin: float
     A3: ArrayLike
@@ -43,7 +46,9 @@ class MeshData:
         self.compactness = 0
         self.aabb_volume = 0
         self.obb_volume = 0
+        self.rectangularity = 0
         self.diameter = 0
+        self.eccentricity = 0
         self.broken_faces_count = 0
         self.barycenter_dist_to_origin = 0
         self.A3 = np.zeros(0)
@@ -164,3 +169,33 @@ def render_class_histograms(meshes: list[MeshData], folder_name: str):
         plt.stairs(mesh.D4, mesh.D4_binsize, fill=False)
     plt.savefig(f"{folder_name}/hist_{current_class}_D4.png")
     plt.clf()
+
+
+def get_feature_vector(mesh: MeshData) -> ArrayLike:
+    vec = np.hstack(
+        [
+            mesh.surface_area,
+            mesh.compactness,
+            mesh.rectangularity,
+            mesh.diameter,
+            mesh.eccentricity,
+            mesh.A3,
+            mesh.D1,
+            mesh.D2,
+            mesh.D3,
+            mesh.D4,
+        ]
+    )
+    vec = vec.astype("float32")
+    return vec
+
+
+@decorators.time_func
+@decorators.cache_result
+def get_database_as_feature_matrix(meshes: list[MeshData]) -> ArrayLike:
+    size_x = len(meshes)
+    size_y = len(get_feature_vector(meshes[0]))
+    feature_matrix = np.zeros((size_x, size_y))
+    for i, mesh in enumerate(meshes):
+        feature_matrix[i, :] = get_feature_vector(mesh)
+    return feature_matrix

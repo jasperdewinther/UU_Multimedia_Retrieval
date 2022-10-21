@@ -25,10 +25,10 @@ if __name__ == "__main__":
 
     meshes = filter_io.remove_nan_inf_models(meshes)
 
-    meshes = descriptors.get_global_descriptors(meshes, 10000)
+    meshes = descriptors.get_global_descriptors(meshes, 1000)
 
-    mesh_data.render_class_histograms(meshes, "histograms/")
-    mesh_data.summarize_data(meshes, "before_histograms.png", "before_data.csv")
+    # mesh_data.render_class_histograms(meshes, "histograms/")
+    # mesh_data.summarize_data(meshes, "before_histograms.png", "before_data.csv")
 
     # Remesh all meshes, change the number of faces to fit in range
     meshes = mesh_normalize.remesh_all_meshes(meshes, 1000, 5000)
@@ -53,14 +53,17 @@ if __name__ == "__main__":
     meshes = filter_io.remove_models_with_too_many_faces(meshes, 0.95)
 
     # Create histograms and database csv
-    mesh_data.summarize_data(meshes, "after_histograms.png", "after_data.csv")
-    mesh_data.render_class_histograms(meshes, "histograms_after/")
+    # mesh_data.summarize_data(meshes, "after_histograms.png", "after_data.csv")
+    # mesh_data.render_class_histograms(meshes, "histograms_after/")
+
+    feature_matrix = mesh_data.get_database_as_feature_matrix(meshes)
+    print(feature_matrix)
 
     # Select meshes to render
     torender = meshes
 
     # Render selected meshes
-    renderer.render_meshes([torender[0]])
+    renderer.render_meshes(torender)
 
     window = initGUI()
 
