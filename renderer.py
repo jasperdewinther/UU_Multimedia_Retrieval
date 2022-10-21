@@ -15,8 +15,11 @@ def render_meshes(meshes: list[MeshData]):
         mesh = pyrender.Mesh.from_trimesh(meshes[i].trimesh_data)
         node = scene.add(mesh)
         position = np.eye((4))
-        position[:3, 3] = [(i % columns_and_rows)-columns_and_rows/2,
-                           (i/columns_and_rows)-columns_and_rows/2, -5]
+        position[:3, 3] = [
+            (i % columns_and_rows) - columns_and_rows / 2,
+            (i / columns_and_rows) - columns_and_rows / 2,
+            -5,
+        ]
         node.matrix = position
 
     # set the camera settings
@@ -25,5 +28,4 @@ def render_meshes(meshes: list[MeshData]):
     scene.add_node(nc)
 
     # run renderer async
-    viewer = pyrender.Viewer(
-        scene, run_in_thread=True, use_raymond_lighting=True, viewport_size=(512, 512))
+    viewer = pyrender.Viewer(scene, run_in_thread=True, use_raymond_lighting=True, viewport_size=(512, 512))

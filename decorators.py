@@ -13,6 +13,7 @@ def time_func(func: Callable) -> Callable:
         end = time.time()
         print(f"{func.__name__}: {end-start:.3f} seconds")
         return result
+
     return wrapped
 
 
@@ -29,18 +30,19 @@ def cache_result(func: Callable) -> Callable:
         else:
             wrapped.has_run = 1
         global cache_count
-        pickle_file = f'./pickle_cache/{cache_count}_{func.__name__}_{wrapped.has_run}.pickle'
+        pickle_file = f"./pickle_cache/{cache_count}_{func.__name__}_{wrapped.has_run}.pickle"
         cache_count += 1
 
         os.makedirs(os.path.dirname(pickle_file), exist_ok=True)
         if os.path.isfile(pickle_file):
             # check if cached
-            old_state = pickle.load(open(pickle_file, 'rb'))
+            old_state = pickle.load(open(pickle_file, "rb"))
             return old_state
         # recalculate and cache
         result = func(*args, **kwargs)
-        file = open(pickle_file, 'wb')
+        file = open(pickle_file, "wb")
         pickle.dump(result, file)
         print(f"{func.__name__} cached as {pickle_file}")
         return result
+
     return wrapped

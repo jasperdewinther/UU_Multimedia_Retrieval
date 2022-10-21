@@ -10,6 +10,7 @@ import descriptors
 import pandas as pd
 import mesh_data
 import normalization
+import matplotlib.pyplot as plt
 
 
 if __name__ == "__main__":
@@ -17,14 +18,17 @@ if __name__ == "__main__":
     meshes = mesh_io.get_all_obj_files("./assets/")
 
     # Reduce dataset for faster computation
-    meshes = meshes[500:700]
+    meshes = meshes[:]
 
     # Load all meshes into ram
     meshes = mesh_io.get_all_meshes(meshes)
 
-    meshes = descriptors.get_global_descriptors(meshes)
-    mesh_data.summarize_data(
-        meshes, "before_histograms.png", "before_data.csv")
+    meshes = filter_io.remove_nan_inf_models(meshes)
+
+    meshes = descriptors.get_global_descriptors(meshes, 10000)
+
+    mesh_data.render_class_histograms(meshes, "histograms/")
+    mesh_data.summarize_data(meshes, "before_histograms.png", "before_data.csv")
 
     # Remesh all meshes, change the number of faces to fit in range
     meshes = mesh_normalize.remesh_all_meshes(meshes, 1000, 5000)
@@ -36,30 +40,32 @@ if __name__ == "__main__":
     meshes = normalization.NormalizeScales(meshes)
 
     # Normalize object alignment
-    #meshes = normalization.NormalizeAlignments(meshes)
+    # meshes = normalization.NormalizeAlignments(meshes)
 
     # Calculate global descriptor
-    meshes = descriptors.get_global_descriptors(meshes)
+    meshes = descriptors.get_global_descriptors(meshes, 10000)
 
     # mesh_data.render_histogram(
     #    meshes, 100, 'broken_faces_count', 'broken_faces_count_hist_before.png')
 
     # Remove meshes which contain nan or inf values and throw away a portion of the dataset with the highest ratio of broken faces
-    meshes = filter_io.remove_degenerate_models(meshes, 0.9)
+    meshes = filter_io.remove_models_with_holes(meshes, 0.9)
+    meshes = filter_io.remove_models_with_too_many_faces(meshes, 0.95)
 
     # Create histograms and database csv
     mesh_data.summarize_data(meshes, "after_histograms.png", "after_data.csv")
+    mesh_data.render_class_histograms(meshes, "histograms_after/")
 
     # Select meshes to render
     torender = meshes
 
     # Render selected meshes
-    renderer.render_meshes(torender)
+    renderer.render_meshes([torender[0]])
 
     window = initGUI()
 
-   # while True:                             # The Event Loop
-    #    if not HandleGUIEvents(window):
-    #        break
+# while True:                             # The Event Loop
+#    if not HandleGUIEvents(window):
+#        break
 
-    # window.close()
+# window.close()
