@@ -1,3 +1,4 @@
+from cgitb import small
 from mesh_data import MeshData
 from trimesh import Trimesh
 import numpy as np
@@ -5,6 +6,7 @@ from numpy.typing import ArrayLike
 import decorators
 import descriptors
 import math
+import random
 
 
 def GetBaryCenter(mesh: Trimesh) -> ArrayLike:
@@ -57,10 +59,12 @@ def NormalizeScales(meshes: list[MeshData]) -> list[MeshData]:
 
 
 def GetEigenValuesAndVectors(mesh: Trimesh) -> tuple[ArrayLike, ArrayLike]:
-    n_points = len(mesh.vertices)
-    x_coords = [vertex[0] for vertex in mesh.vertices]
-    y_coords = [vertex[1] for vertex in mesh.vertices]
-    z_coords = [vertex[2] for vertex in mesh.vertices]
+    vertices = RandomlySamplePointsOverMesh(mesh, 10000)
+
+    x_coords = [vertex[0] for vertex in vertices]
+    y_coords = [vertex[1] for vertex in vertices]
+    z_coords = [vertex[2] for vertex in vertices]
+    n_points = len(vertices)
     A = np.zeros((3, n_points))
     A[0] = x_coords
     A[1] = y_coords
@@ -129,6 +133,9 @@ def NormalizeAlignment(mesh: MeshData) -> MeshData:
     # eigenvectors = mesh.trimesh_data.principal_inertia_vectors
     # eigenvalues = mesh.trimesh_data.principal_inertia_components
 
+
+
+    
     ordered_eigenvectors = []
     ordered_eigenvalues = []
 
@@ -168,3 +175,45 @@ def NormalizeAlignment(mesh: MeshData) -> MeshData:
         # print("new", vertex)
 
     return mesh
+
+def RandomlySamplePointsOverMesh(mesh: Trimesh, sampleCount: int) -> tuple[float, float, float]:
+    vertices = []
+
+    total_area = 0
+    triangles = []
+    for face in mesh.faces:
+        v0 = mesh.vertices[face[0]]
+        v1 = mesh.vertices[face[1]]
+        v2 = mesh.vertices[face[2]]
+        #centroid = (v0 + v1 + v2) / 3
+
+        cross = np.cross(v0-v1, v0-v2)
+        area = math.sqrt(cross[0] ** 2 + cross[2] ** 2 + cross[2] ** 2)  / 2
+        triangles.append((v0, v1, v2, area))
+        total_area += area
+    
+    rands = sorted([random.random() for x in range(sampleCount)])
+
+    area_limit = 0
+    rand_index = 0
+    rand_value = rands[rand_index]
+    for i in range(len(triangles)):
+        
+        if (rand_index >= sampleCount):
+            break
+
+        area_limit += triangles[i][3]
+        while rand_value * total_area < area_limit:
+            # add random point on the triangle
+            r1 = random.random()
+            r2 = random.random()
+            new_vertex = (1 - math.sqrt(r1))*triangles[i][0] + (math.sqrt(r1)* (1 - r2))*triangles[i][1] + (r2*math.sqrt(r1))*triangles[i][2]
+            vertices.apend((new_vertex[0], new_vertex[1], new_vertex[2]))
+
+            # go to next random sorted number
+            rand_index += 1
+            if (rand_index >= sampleCount):
+                break
+            rand_value = rands[rand_index]
+
+    return vertices
