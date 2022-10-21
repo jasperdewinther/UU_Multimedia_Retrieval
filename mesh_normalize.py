@@ -20,6 +20,7 @@ import numpy as np
 def remesh_all_meshes(meshes: list[MeshData], target_min: int, target_max: int) -> list[MeshData]:
     # load the mesh of every .obj file
     for mesh in meshes:
+        print(mesh)
         mesh.trimesh_data = mesh.trimesh_data.process(validate=True)
         mesh.trimesh_data.fill_holes()
 

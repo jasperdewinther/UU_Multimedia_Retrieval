@@ -10,6 +10,7 @@ import descriptors
 import pandas as pd
 import mesh_data
 import normalization
+import query
 import matplotlib.pyplot as plt
 
 
@@ -18,7 +19,6 @@ if __name__ == "__main__":
     meshes = mesh_io.get_all_obj_files("./assets/")
 
     # Reduce dataset for faster computation
-    meshes = meshes[:]
 
     # Load all meshes into ram
     meshes = mesh_io.get_all_meshes(meshes)
@@ -43,7 +43,7 @@ if __name__ == "__main__":
     # meshes = normalization.NormalizeAlignments(meshes)
 
     # Calculate global descriptor
-    meshes = descriptors.get_global_descriptors(meshes, 10000)
+    meshes = descriptors.get_global_descriptors(meshes, 1000)
 
     # mesh_data.render_histogram(
     #    meshes, 100, 'broken_faces_count', 'broken_faces_count_hist_before.png')
@@ -56,8 +56,10 @@ if __name__ == "__main__":
     # mesh_data.summarize_data(meshes, "after_histograms.png", "after_data.csv")
     # mesh_data.render_class_histograms(meshes, "histograms_after/")
 
-    feature_matrix = mesh_data.get_database_as_feature_matrix(meshes)
-    print(feature_matrix)
+    knn = query.create_knn_structure(meshes, 5)
+
+    nearest = query.query_knn(meshes[654], meshes, knn, 5)
+    print(nearest)
 
     # Select meshes to render
     torender = meshes

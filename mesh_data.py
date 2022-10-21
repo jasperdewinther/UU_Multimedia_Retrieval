@@ -62,6 +62,23 @@ class MeshData:
         self.D4 = np.zeros(0)
         self.D4_binsize = np.zeros(0)
 
+    def __str__(self):
+        return f"{self.filename}, \
+        {self.mesh_class}, \
+        {self.trimesh_data}, \
+        {self.bounding_box}, \
+        {self.vertex_count}, \
+        {self.face_count}, \
+        {self.surface_area}, \
+        {self.compactness}, \
+        {self.aabb_volume}, \
+        {self.obb_volume}, \
+        {self.rectangularity}, \
+        {self.diameter}, \
+        {self.eccentricity}, \
+        {self.broken_faces_count}, \
+        {self.barycenter_dist_to_origin},"
+
 
 pd.set_option("display.float_format", lambda x: "{:.3e}".format(x) if x > 999999 or x < 0.01 else "{:.3f}".format(x))
 
@@ -190,8 +207,6 @@ def get_feature_vector(mesh: MeshData) -> ArrayLike:
     return vec
 
 
-@decorators.time_func
-@decorators.cache_result
 def get_database_as_feature_matrix(meshes: list[MeshData]) -> ArrayLike:
     size_x = len(meshes)
     size_y = len(get_feature_vector(meshes[0]))
