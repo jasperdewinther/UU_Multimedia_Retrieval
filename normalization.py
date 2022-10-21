@@ -1,3 +1,4 @@
+from cgitb import small
 from mesh_data import MeshData
 from trimesh import Trimesh
 import numpy as np
@@ -5,6 +6,7 @@ from numpy.typing import ArrayLike
 import decorators
 import descriptors
 import math
+import random
 
 
 def GetBaryCenter(mesh: Trimesh) -> ArrayLike:
@@ -58,10 +60,109 @@ def NormalizeScales(meshes: list[MeshData]) -> list[MeshData]:
 
 
 def GetEigenValuesAndVectors(mesh: Trimesh) -> tuple[ArrayLike, ArrayLike]:
-    n_points = len(mesh.vertices)
-    x_coords = [vertex[0] for vertex in mesh.vertices]
-    y_coords = [vertex[1] for vertex in mesh.vertices]
-    z_coords = [vertex[2] for vertex in mesh.vertices]
+
+    ## Get sum of connected face surfaces for each vertex
+    ## Move vertex relative to the above away from the barycenter
+    ## Calculate PCA
+
+    samples = 10000
+
+    x_coords = []
+    y_coords = []
+    z_coords = []
+
+    total_area = 0
+    triangles = []
+    for face in mesh.faces:
+        v0 = mesh.vertices[face[0]]
+        v1 = mesh.vertices[face[1]]
+        v2 = mesh.vertices[face[2]]
+        #centroid = (v0 + v1 + v2) / 3
+
+        cross = np.cross(v0-v1, v0-v2)
+        area = math.sqrt(cross[0] ** 2 + cross[2] ** 2 + cross[2] ** 2)  / 2
+        triangles.append((v0, v1, v2, area))
+        total_area += area
+    
+    rands = sorted([random.random() for x in range(samples)])
+
+    area_limit = 0
+    rand_index = 0
+    rand_value = rands[rand_index]
+    for i in range(len(triangles)):
+        
+        if (rand_index >= samples):
+            break
+
+        area_limit += triangles[i][3]
+        while rand_value * total_area < area_limit:
+            # add random point on the triangle
+            r1 = random.random()
+            r2 = random.random()
+            new_vertex = (1 - math.sqrt(r1))*triangles[i][0] + (math.sqrt(r1)* (1 - r2))*triangles[i][1] + (r2*math.sqrt(r1))*triangles[i][2]
+            x_coords.append(new_vertex[0])
+            y_coords.append(new_vertex[1])
+            z_coords.append(new_vertex[2])
+
+            # go to next random sorted number
+            rand_index += 1
+            if (rand_index >= samples):
+                break
+            rand_value = rands[rand_index]
+
+    # vi = 0
+    # biggest_area = 0
+    # smallest_area = np.inf
+    # max_vertex_addition = 10
+
+    # faces = []
+    # x_coords = []
+    # y_coords = []
+    # z_coords = []
+
+    # for face in mesh.faces:
+    #     area = 0
+    #     v0 = mesh.vertices[face[0]]
+    #     v1 = mesh.vertices[face[1]]
+    #     v2 = mesh.vertices[face[2]]
+    #     centroid = (v0 + v1 + v2) / 3
+
+    #     cross = np.cross(v0-v1, v0-v2)
+    #     area = math.sqrt(cross[0] ** 2 + cross[2] ** 2 + cross[2] ** 2)  / 2
+
+    #     faces.append((centroid, area))
+
+    #     if (area > biggest_area):
+    #         biggest_area = area
+    #         #print(area)
+
+    #     if (area < smallest_area):
+    #         smallest_area = area
+
+    # ratio = biggest_area / smallest_area
+    # print(ratio)
+    # for face in faces:
+    #     new_vertex_count = int(np.interp(face[1], [smallest_area, biggest_area], [0, 20]))
+
+    #     for i in range(new_vertex_count):
+    #         x_coords.append(face[0][0])
+    #         y_coords.append(face[0][1])
+    #         z_coords.append(face[0][2])
+
+    # print(smallest_area)
+    # print(biggest_area)
+
+
+    #     #print(face[0])
+
+    # print(len(x_coords))
+
+        #print(vertex_faces)
+    # n_points = len(mesh.vertices) + len(x_coords)
+    # x_coords = [vertex[0] for vertex in mesh.vertices]
+    # y_coords = [vertex[1] for vertex in mesh.vertices]
+    # z_coords = [vertex[2] for vertex in mesh.vertices]
+    n_points = len(x_coords)
     A = np.zeros((3, n_points))
     A[0] = x_coords
     A[1] = y_coords
@@ -131,6 +232,9 @@ def NormalizeAlignment(mesh: MeshData) -> MeshData:
     #eigenvectors = mesh.trimesh_data.principal_inertia_vectors
     #eigenvalues = mesh.trimesh_data.principal_inertia_components
 
+
+
+    
     ordered_eigenvectors = []
     ordered_eigenvalues = []
 
