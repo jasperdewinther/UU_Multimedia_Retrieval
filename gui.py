@@ -15,7 +15,7 @@ def initGUI() -> sg.Window:
 def HandleGUIEvents(window: sg.Window) -> bool:
     event, input = window.read()
     print(event, input)
-    model = mesh_io.get_mesh(input)
+    model = trimesh.load(input)
     if event == sg.WIN_CLOSED or event == "Exit":
         return False
 

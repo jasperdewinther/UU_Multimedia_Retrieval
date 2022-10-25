@@ -9,28 +9,17 @@ import math
 import trimesh
 
 
-@decorators.time_func
-@decorators.cache_result
-def remove_nan_inf_models(meshes: list[MeshData]) -> list[MeshData]:
-    i = 0
-    while i < len(meshes):
-        # remove meshes which contain nan or inf values
-        if (
-            meshes[i].trimesh_data.volume <= 0
-            or meshes[i].trimesh_data.volume == math.nan
-            or abs(meshes[i].trimesh_data.volume) == math.inf
-        ):
-            meshes.pop(i)
-            continue
-        if (
-            meshes[i].trimesh_data.area <= 0
-            or meshes[i].trimesh_data.area == math.nan
-            or abs(meshes[i].trimesh_data.area) == math.inf
-        ):
-            meshes.pop(i)
-            continue
-        i += 1
-    return meshes
+def remove_nan_inf_model(mesh: MeshData) -> bool:
+    volume = mesh.trimesh_data.volume
+    area = mesh.trimesh_data.area
+    return (
+        volume > 0
+        and volume != math.nan
+        and abs(volume) != math.inf
+        and area > 0
+        and area != math.nan
+        and abs(area) != math.inf
+    )
 
 
 @decorators.time_func

@@ -12,6 +12,7 @@ import mesh_data
 import normalization
 import query
 import matplotlib.pyplot as plt
+import pipeline_stages
 
 
 if __name__ == "__main__":
@@ -21,17 +22,16 @@ if __name__ == "__main__":
     # Reduce dataset for faster computation
 
     # Load all meshes into ram
-    meshes = mesh_io.get_all_meshes(meshes)
+    meshes = pipeline_stages.get_all_meshes(meshes)
 
-    # meshes = filter_io.remove_nan_inf_models(meshes)
+    meshes = pipeline_stages.remove_nan_inf_models(meshes)
 
-    meshes = descriptors.get_global_descriptors(meshes, 1000)
-
+    # meshes = descriptors.get_global_descriptors(meshes, 1000)
     # mesh_data.render_class_histograms(meshes, "histograms/")
     # mesh_data.summarize_data(meshes, "before_histograms.png", "before_data.csv")
 
     # Remesh all meshes, change the number of faces to fit in range
-    meshes = mesh_normalize.remesh_all_meshes(meshes, 1000, 5000)
+    meshes = pipeline_stages.remesh_all_meshes(meshes, 1000, 5000)
 
     # Normalize the location
     meshes = normalization.NormalizeTranslations(meshes)

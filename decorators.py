@@ -31,6 +31,7 @@ def cache_result(func: Callable) -> Callable:
             wrapped.has_run = 1
         global cache_count
         pickle_file = f"./pickle_cache/{cache_count}_{func.__name__}_{wrapped.has_run}.pickle"
+        print(f"performing {cache_count}_{func.__name__}_{wrapped.has_run}")
         cache_count += 1
 
         os.makedirs(os.path.dirname(pickle_file), exist_ok=True)

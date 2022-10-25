@@ -15,30 +15,27 @@ import pymeshfix as mf
 import numpy as np
 
 
-@decorators.time_func
-@decorators.cache_result
-def remesh_all_meshes(meshes: list[MeshData], target_min: int, target_max: int) -> list[MeshData]:
+def remesh(mesh: MeshData, target_min: int, target_max: int) -> MeshData:
     # load the mesh of every .obj file
-    for mesh in meshes:
-        print(mesh)
-        mesh.trimesh_data = mesh.trimesh_data.process(validate=True)
-        mesh.trimesh_data.fill_holes()
+    mesh.trimesh_data = Trimesh(mesh.trimesh_data.vertices, mesh.trimesh_data.faces)
+    mesh.trimesh_data = mesh.trimesh_data.process(validate=True)
+    mesh.trimesh_data.fill_holes()
 
-        if len(mesh.trimesh_data.faces) < target_min:
-            while len(mesh.trimesh_data.faces) < target_min:
-                mesh.trimesh_data = mesh.trimesh_data.subdivide()
-        if len(mesh.trimesh_data.faces) > target_max:
-            mesh.trimesh_data = simplify_mesh(mesh.trimesh_data, target_max)
+    if len(mesh.trimesh_data.faces) < target_min:
+        while len(mesh.trimesh_data.faces) < target_min:
+            mesh.trimesh_data = mesh.trimesh_data.subdivide()
+    if len(mesh.trimesh_data.faces) > target_max:
+        mesh.trimesh_data = simplify_mesh(mesh.trimesh_data, target_max)
 
-    return meshes
+    return mesh
 
 
 def simplify_mesh(mesh: Trimesh, target_max: int) -> Trimesh:
     mesh_simplifier = pyfqmr.Simplify()
     mesh_simplifier.setMesh(mesh.vertices, mesh.faces)
     mesh_simplifier.simplify_mesh(target_count=target_max, verbose=0)
-    vertices, faces, normals = mesh_simplifier.getMesh()
-    new_mesh = Trimesh(vertices, faces, normals)
+    vertices, faces, _ = mesh_simplifier.getMesh()
+    new_mesh = Trimesh(vertices, faces)
     return new_mesh
 
 
