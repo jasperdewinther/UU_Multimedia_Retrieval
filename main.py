@@ -23,7 +23,7 @@ if __name__ == "__main__":
     # Load all meshes into ram
     meshes = mesh_io.get_all_meshes(meshes)
 
-    meshes = filter_io.remove_nan_inf_models(meshes)
+    # meshes = filter_io.remove_nan_inf_models(meshes)
 
     meshes = descriptors.get_global_descriptors(meshes, 1000)
 
@@ -56,13 +56,17 @@ if __name__ == "__main__":
     # mesh_data.summarize_data(meshes, "after_histograms.png", "after_data.csv")
     # mesh_data.render_class_histograms(meshes, "histograms_after/")
 
-    knn = query.create_knn_structure(meshes, 5)
+    # knn = query.create_knn_structure(meshes, 5)
 
-    nearest = query.query_knn(meshes[654], meshes, knn, 5)
-    print(nearest)
+    # nearest = query.query_knn(meshes[654], meshes, knn, 5)
+    # print(nearest)
 
     # Select meshes to render
-    torender = meshes
+    torender = [
+        mesh_data.get_outlier_high_mesh(meshes, "broken_faces_count"),
+        mesh_data.get_median_mesh(meshes, "broken_faces_count"),
+        mesh_data.get_outlier_low_mesh(meshes, "broken_faces_count"),
+    ]
 
     # Render selected meshes
     renderer.render_meshes(torender)
