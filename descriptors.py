@@ -31,12 +31,24 @@ def get_global_descriptors(meshes: list[mesh_data.MeshData], descriptor_iteratio
         surface_area = mesh.trimesh_data.area
 
         # compactness
-        volume = mesh.trimesh_data.volume
+        volume = 0
+        # compactness
+        for triangles in mesh.trimesh_data.faces:
+            vertex1 = mesh.trimesh_data.vertices[triangles[0]]
+            vertex2 = mesh.trimesh_data.vertices[triangles[1]]
+            vertex3 = mesh.trimesh_data.vertices[triangles[2]]
+
+            vector1 = vertex1 - mesh.trimesh_data.centroid
+            vector2 = vertex2 - mesh.trimesh_data.centroid
+            vector3 = vertex3 - mesh.trimesh_data.centroid
+
+            volume += np.dot(np.cross(vector1, vector2), vector3)
         compactness = (surface_area**3) / (36 * math.pi * (volume**2))
 
         # axis-aligned bounding-box volume
         aabb_volume = mesh.trimesh_data.bounding_box.volume
         obb_volume = mesh.trimesh_data.bounding_box_oriented.volume
+        rectangularity = abs(volume / obb_volume)
 
         # diameter according to https://stackoverflow.com/a/60955825
         hull = ConvexHull(mesh.trimesh_data.vertices)
@@ -65,7 +77,7 @@ def get_global_descriptors(meshes: list[mesh_data.MeshData], descriptor_iteratio
         mesh.compactness = compactness
         mesh.aabb_volume = aabb_volume
         mesh.obb_volume = obb_volume
-        mesh.rectangularity = volume / obb_volume
+        mesh.rectangularity = rectangularity
         mesh.diameter = diameter
         mesh.eccentricity = eccentricity
         mesh.barycenter_dist_to_origin = math.dist([0, 0, 0], mesh.trimesh_data.centroid)
