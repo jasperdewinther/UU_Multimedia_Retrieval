@@ -62,22 +62,27 @@ class MeshData:
         self.D4 = np.zeros(0)
         self.D4_binsize = np.zeros(0)
 
+    def __repr__(self):
+        return str(self)
+
     def __str__(self):
-        return f"{self.filename}, \
-        {self.mesh_class}, \
-        {self.trimesh_data}, \
-        {self.bounding_box}, \
-        {self.vertex_count}, \
-        {self.face_count}, \
-        {self.surface_area}, \
-        {self.compactness}, \
-        {self.aabb_volume}, \
-        {self.obb_volume}, \
-        {self.rectangularity}, \
-        {self.diameter}, \
-        {self.eccentricity}, \
-        {self.broken_faces_count}, \
-        {self.barycenter_dist_to_origin},"
+        return f"\n----------------------------------------\n\
+filename: {self.filename}\n\
+mesh_class: {self.mesh_class}\n\
+trimesh_data: {self.trimesh_data}\n\
+bounding_box: {self.bounding_box}\n\
+vertex_count: {self.vertex_count}\n\
+face_count: {self.face_count}\n\
+surface_area: {self.surface_area}\n\
+compactness: {self.compactness}\n\
+aabb_volume: {self.aabb_volume}\n\
+obb_volume: {self.obb_volume}\n\
+rectangularity: {self.rectangularity}\n\
+diameter: {self.diameter}\n\
+eccentricity: {self.eccentricity}\n\
+broken_faces_count: {self.broken_faces_count}\n\
+barycenter_dist_to_origin: {self.barycenter_dist_to_origin}\n\
+----------------------------------------\n"
 
 
 pd.set_option("display.float_format", lambda x: "{:.3e}".format(x) if x > 999999 or x < 0.01 else "{:.3f}".format(x))

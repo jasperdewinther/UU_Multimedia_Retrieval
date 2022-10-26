@@ -198,6 +198,9 @@ def get_shape_properties(
 
     # A3: angle between 3 random vertices
     # compute number of samples along each of the three dimensions
+    # vertex_indices = np.random.rand(iterations, 3) * len(mesh.trimesh_data.vertices)
+    # triangles = mesh.trimesh_data.vertices.view(np.ndarray)[mesh.trimesh_data.faces]
+
     for i in range(n):
         vi = random.randint(0, N)
         vj = random.randint(0, N)
