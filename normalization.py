@@ -201,7 +201,7 @@ def RandomlySamplePointsOverMesh(mesh: Trimesh, sampleCount: int) -> tuple[float
                 + (math.sqrt(r1) * (1 - r2)) * triangles[i][1]
                 + (r2 * math.sqrt(r1)) * triangles[i][2]
             )
-            vertices.apend((new_vertex[0], new_vertex[1], new_vertex[2]))
+            vertices.append((new_vertex[0], new_vertex[1], new_vertex[2]))
 
             # go to next random sorted number
             rand_index += 1
