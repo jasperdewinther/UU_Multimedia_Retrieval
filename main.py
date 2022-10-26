@@ -24,6 +24,7 @@ if __name__ == "__main__":
     meshes = mesh_io.get_all_obj_files("./assets/")
 
     # Reduce dataset for faster computation
+    meshes = meshes[:200]
 
     # Load all meshes into ram
     meshes = pipeline_stages.get_all_meshes(meshes)
@@ -44,7 +45,7 @@ if __name__ == "__main__":
     meshes = pipeline_stages.NormalizeScales(meshes)
 
     # Normalize object alignment
-    # meshes = pipeline_stages.NormalizeAlignments(meshes)
+    meshes = pipeline_stages.NormalizeAlignments(meshes)
 
     # Calculate global descriptor
     meshes = pipeline_stages.get_global_descriptors(meshes, 1000)
@@ -56,6 +57,9 @@ if __name__ == "__main__":
     # Remove meshes which contain nan or inf values and throw away a portion of the dataset with the highest ratio of broken faces
     meshes = pipeline_stages.remove_models_with_holes(meshes, 0.9)
     meshes = pipeline_stages.remove_models_with_too_many_faces(meshes, 0.95)
+
+    meshes = pipeline_stages.get_global_descriptors(meshes, 1000)
+    meshes = pipeline_stages.get_shape_properties(meshes, 1000)
 
     # Create histograms and database csv
     mesh_data.summarize_data(meshes, "after_histograms.png", "after_data.csv")
