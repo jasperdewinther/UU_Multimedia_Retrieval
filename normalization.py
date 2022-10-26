@@ -147,9 +147,9 @@ def NormalizeAlignment(mesh: MeshData) -> MeshData:
         ordered_eigenvectors.insert(2, eigenvectors[2])
         ordered_eigenvalues.insert(2, eigenvalues[2])
 
-    print("centroid: ", mesh.trimesh_data.centroid)
-    print("eigenvectors: \n", eigenvectors)
-    print("eigenvalues: ", eigenvalues)
+    # print("centroid: ", mesh.trimesh_data.centroid)
+    # print("eigenvectors: \n", eigenvectors)
+    # print("eigenvalues: ", eigenvalues)
     for vertex in mesh.trimesh_data.vertices:
         # print("old", vertex)
         new_vertex = [0, 0, 0]
