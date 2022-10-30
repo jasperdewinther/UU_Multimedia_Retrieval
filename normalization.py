@@ -19,21 +19,18 @@ def NormalizeTranslation(mesh: Trimesh):
         vertex -= baryCenter
 
 
-@decorators.time_func
-@decorators.cache_result
-def NormalizeTranslations(meshes: list[MeshData]) -> list[MeshData]:
-    for mesh in meshes:
-        baryCenter = GetBaryCenter(mesh.trimesh_data)
-        for vertex in mesh.trimesh_data.vertices:
-            vertex -= baryCenter
+def NormalizeTranslation(mesh: MeshData) -> MeshData:
+    baryCenter = GetBaryCenter(mesh.trimesh_data)
+    for vertex in mesh.trimesh_data.vertices:
+        vertex -= baryCenter
 
-        d = math.sqrt(
-            mesh.trimesh_data.centroid[0] ** 2 + mesh.trimesh_data.centroid[1] ** 2 + mesh.trimesh_data.centroid[2] ** 2
-        )
-        if d > 0.01:
-            print("distance", d)
+    d = math.sqrt(
+        mesh.trimesh_data.centroid[0] ** 2 + mesh.trimesh_data.centroid[1] ** 2 + mesh.trimesh_data.centroid[2] ** 2
+    )
+    if d > 0.01:
+        print("distance", d)
 
-    return meshes
+    return mesh
 
 
 def GetBoundingBoxBiggestAxis(boundingbox: list[float]) -> float:
@@ -47,15 +44,12 @@ def GetBoundingBoxBiggestAxis(boundingbox: list[float]) -> float:
     return max(Dx, Dy, Dz)
 
 
-@decorators.time_func
-@decorators.cache_result
-def NormalizeScales(meshes: list[MeshData]) -> list[MeshData]:
-    for mesh in meshes:
-        scale_factor = 1 / GetBoundingBoxBiggestAxis(descriptors.get_bounding_box(mesh.trimesh_data))
-        for vertex in mesh.trimesh_data.vertices:
-            vertex *= scale_factor
+def NormalizeScale(mesh: MeshData) -> MeshData:
+    scale_factor = 1 / GetBoundingBoxBiggestAxis(descriptors.get_bounding_box(mesh.trimesh_data))
+    for vertex in mesh.trimesh_data.vertices:
+        vertex *= scale_factor
 
-    return meshes
+    return mesh
 
 
 def GetEigenValuesAndVectors(mesh: Trimesh) -> tuple[ArrayLike, ArrayLike]:
@@ -77,54 +71,51 @@ def GetEigenValuesAndVectors(mesh: Trimesh) -> tuple[ArrayLike, ArrayLike]:
     return eigenvalues, eigenvectors
 
 
-@decorators.time_func
-@decorators.cache_result
-def NormalizeAlignments(meshes: list[MeshData]) -> list[MeshData]:
-    for mesh in meshes:
-        # print("old c: ", mesh.trimesh_data.centroid)
-        eigenvalues, eigenvectors = GetEigenValuesAndVectors(mesh.trimesh_data)
-        # eigenvectors = mesh.trimesh_data.principal_inertia_vectors
-        # eigenvalues = mesh.trimesh_data.principal_inertia_components
+def NormalizeAlignment(mesh: MeshData) -> MeshData:
+    # print("old c: ", mesh.trimesh_data.centroid)
+    eigenvalues, eigenvectors = GetEigenValuesAndVectors(mesh.trimesh_data)
+    # eigenvectors = mesh.trimesh_data.principal_inertia_vectors
+    # eigenvalues = mesh.trimesh_data.principal_inertia_components
 
-        ordered_eigenvectors = []
-        ordered_eigenvalues = []
+    ordered_eigenvectors = []
+    ordered_eigenvalues = []
 
-        if eigenvalues[0] > eigenvalues[1]:
-            ordered_eigenvectors.append(eigenvectors[0])
-            ordered_eigenvectors.append(eigenvectors[1])
-            ordered_eigenvalues.append(eigenvalues[0])
-            ordered_eigenvalues.append(eigenvalues[1])
-        else:
-            ordered_eigenvectors.append(eigenvectors[1])
-            ordered_eigenvectors.append(eigenvectors[0])
-            ordered_eigenvalues.append(eigenvalues[1])
-            ordered_eigenvalues.append(eigenvalues[0])
+    if eigenvalues[0] > eigenvalues[1]:
+        ordered_eigenvectors.append(eigenvectors[0])
+        ordered_eigenvectors.append(eigenvectors[1])
+        ordered_eigenvalues.append(eigenvalues[0])
+        ordered_eigenvalues.append(eigenvalues[1])
+    else:
+        ordered_eigenvectors.append(eigenvectors[1])
+        ordered_eigenvectors.append(eigenvectors[0])
+        ordered_eigenvalues.append(eigenvalues[1])
+        ordered_eigenvalues.append(eigenvalues[0])
 
-        if eigenvalues[2] > ordered_eigenvalues[0]:
-            ordered_eigenvectors.insert(0, eigenvectors[2])
-            ordered_eigenvalues.insert(0, eigenvalues[2])
-        elif eigenvalues[2] > ordered_eigenvalues[1]:
-            ordered_eigenvectors.insert(1, eigenvectors[2])
-            ordered_eigenvalues.insert(1, eigenvalues[2])
-        else:
-            ordered_eigenvectors.insert(2, eigenvectors[2])
-            ordered_eigenvalues.insert(2, eigenvalues[2])
+    if eigenvalues[2] > ordered_eigenvalues[0]:
+        ordered_eigenvectors.insert(0, eigenvectors[2])
+        ordered_eigenvalues.insert(0, eigenvalues[2])
+    elif eigenvalues[2] > ordered_eigenvalues[1]:
+        ordered_eigenvectors.insert(1, eigenvectors[2])
+        ordered_eigenvalues.insert(1, eigenvalues[2])
+    else:
+        ordered_eigenvectors.insert(2, eigenvectors[2])
+        ordered_eigenvalues.insert(2, eigenvalues[2])
 
-        for vertex in mesh.trimesh_data.vertices:
-            # print("old", vertex)
-            new_vertex = [0, 0, 0]
-            new_vertex[0] = np.dot(vertex, ordered_eigenvectors[0])
-            new_vertex[1] = np.dot(vertex, ordered_eigenvectors[1])
-            new_vertex[2] = np.dot(vertex, np.cross(ordered_eigenvectors[0], ordered_eigenvectors[1]))
+    for vertex in mesh.trimesh_data.vertices:
+        # print("old", vertex)
+        new_vertex = [0, 0, 0]
+        new_vertex[0] = np.dot(vertex, ordered_eigenvectors[0])
+        new_vertex[1] = np.dot(vertex, ordered_eigenvectors[1])
+        new_vertex[2] = np.dot(vertex, np.cross(ordered_eigenvectors[0], ordered_eigenvectors[1]))
 
-            vertex[0] = new_vertex[0]
-            vertex[1] = new_vertex[1]
-            vertex[2] = new_vertex[2]
-            # print("new", vertex)
+        vertex[0] = new_vertex[0]
+        vertex[1] = new_vertex[1]
+        vertex[2] = new_vertex[2]
+        # print("new", vertex)
 
-        # print("new c: ", mesh.trimesh_data.centroid)
+    # print("new c: ", mesh.trimesh_data.centroid)
 
-    return meshes
+    return mesh
 
 
 def NormalizeAlignment(mesh: MeshData) -> MeshData:
@@ -133,9 +124,6 @@ def NormalizeAlignment(mesh: MeshData) -> MeshData:
     # eigenvectors = mesh.trimesh_data.principal_inertia_vectors
     # eigenvalues = mesh.trimesh_data.principal_inertia_components
 
-
-
-    
     ordered_eigenvectors = []
     ordered_eigenvalues = []
 
@@ -159,9 +147,9 @@ def NormalizeAlignment(mesh: MeshData) -> MeshData:
         ordered_eigenvectors.insert(2, eigenvectors[2])
         ordered_eigenvalues.insert(2, eigenvalues[2])
 
-    print("centroid: ", mesh.trimesh_data.centroid)
-    print("eigenvectors: \n", eigenvectors)
-    print("eigenvalues: ", eigenvalues)
+    # print("centroid: ", mesh.trimesh_data.centroid)
+    # print("eigenvectors: \n", eigenvectors)
+    # print("eigenvalues: ", eigenvalues)
     for vertex in mesh.trimesh_data.vertices:
         # print("old", vertex)
         new_vertex = [0, 0, 0]
@@ -176,6 +164,7 @@ def NormalizeAlignment(mesh: MeshData) -> MeshData:
 
     return mesh
 
+
 def RandomlySamplePointsOverMesh(mesh: Trimesh, sampleCount: int) -> tuple[float, float, float]:
     vertices = []
 
@@ -185,21 +174,21 @@ def RandomlySamplePointsOverMesh(mesh: Trimesh, sampleCount: int) -> tuple[float
         v0 = mesh.vertices[face[0]]
         v1 = mesh.vertices[face[1]]
         v2 = mesh.vertices[face[2]]
-        #centroid = (v0 + v1 + v2) / 3
+        # centroid = (v0 + v1 + v2) / 3
 
-        cross = np.cross(v0-v1, v0-v2)
-        area = math.sqrt(cross[0] ** 2 + cross[2] ** 2 + cross[2] ** 2)  / 2
+        cross = np.cross(v0 - v1, v0 - v2)
+        area = math.sqrt(cross[0] ** 2 + cross[2] ** 2 + cross[2] ** 2) / 2
         triangles.append((v0, v1, v2, area))
         total_area += area
-    
+
     rands = sorted([random.random() for x in range(sampleCount)])
 
     area_limit = 0
     rand_index = 0
     rand_value = rands[rand_index]
     for i in range(len(triangles)):
-        
-        if (rand_index >= sampleCount):
+
+        if rand_index >= sampleCount:
             break
 
         area_limit += triangles[i][3]
@@ -207,12 +196,16 @@ def RandomlySamplePointsOverMesh(mesh: Trimesh, sampleCount: int) -> tuple[float
             # add random point on the triangle
             r1 = random.random()
             r2 = random.random()
-            new_vertex = (1 - math.sqrt(r1))*triangles[i][0] + (math.sqrt(r1)* (1 - r2))*triangles[i][1] + (r2*math.sqrt(r1))*triangles[i][2]
-            vertices.apend((new_vertex[0], new_vertex[1], new_vertex[2]))
+            new_vertex = (
+                (1 - math.sqrt(r1)) * triangles[i][0]
+                + (math.sqrt(r1) * (1 - r2)) * triangles[i][1]
+                + (r2 * math.sqrt(r1)) * triangles[i][2]
+            )
+            vertices.append((new_vertex[0], new_vertex[1], new_vertex[2]))
 
             # go to next random sorted number
             rand_index += 1
-            if (rand_index >= sampleCount):
+            if rand_index >= sampleCount:
                 break
             rand_value = rands[rand_index]
 
