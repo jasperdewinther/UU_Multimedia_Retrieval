@@ -105,7 +105,7 @@ def get_minmax_shape_properties(meshes: list[MeshData]) -> list[float]:
     return [minA3, maxA3, minD1, maxD1, minD2, maxD2, minD3, maxD3, minD4, maxD4]
 
 
-def gen_histograms(mesh: MeshData, min_max: list[float], descriptor_iterations: int):
+def gen_histograms(mesh: MeshData, min_max: list[float], descriptor_iterations: int, d1_iterations: int):
     minA3 = min_max[0]
     maxA3 = min_max[1]
     minD1 = min_max[2]
@@ -124,7 +124,7 @@ def gen_histograms(mesh: MeshData, min_max: list[float], descriptor_iterations: 
     mesh.A3_binsize = bin_sizes
 
     counts, bin_sizes = np.histogram(
-        mesh.D1, math.floor(descriptor_iterations ** (1 / 2)), [math.floor(minD1), math.ceil(maxD1)]
+        mesh.D1, math.floor(d1_iterations ** (1 / 2)), [math.floor(minD1), math.ceil(maxD1)]
     )
     mesh.D1 = counts
     mesh.D1_binsize = bin_sizes
