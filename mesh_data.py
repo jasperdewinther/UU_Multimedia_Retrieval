@@ -19,6 +19,7 @@ class MeshData:
     compactness: float
     aabb_volume: float
     obb_volume: float
+    aaobb_volume_ratio: float
     rectangularity: float
     diameter: float
     eccentricity: float
@@ -106,6 +107,7 @@ def summarize_data(meshes: list[MeshData], figure_filename: str = None, csv_file
             "compactness": [mesh.compactness],
             "aabb_volume": [mesh.aabb_volume],
             "obb_volume": [mesh.obb_volume],
+            "aaobb_volume_ratio": [mesh.aaobb_volume_ratio],
             "diameter": [mesh.diameter],
             "broken_faces_count": [mesh.broken_faces_count],
             "barycenter_dist_to_origin": [mesh.barycenter_dist_to_origin],
@@ -148,9 +150,14 @@ def render_class_histograms(meshes: list[MeshData], folder_name: str):
             plt.savefig(f"{folder_name}/hist_{current_class}_A3.png")
             plt.clf()
             current_class = mesh.mesh_class
-        plt.stairs(mesh.A3, mesh.A3_binsize, fill=False)
+        plot_points = []
+        for i in range(len(mesh.A3_binsize)-1):
+            plot_points.append((mesh.A3_binsize[i] + mesh.A3_binsize[i+1]) / 2) 
+        plt.plot(plot_points, mesh.A3)
+        #plt.stairs(mesh.A3, mesh.A3_binsize, fill=False)
     plt.savefig(f"{folder_name}/hist_{current_class}_A3.png")
-    plt.clf()
+    plt.clf()   
+
 
     current_class = meshes[0].mesh_class
     for mesh in meshes:
@@ -158,9 +165,18 @@ def render_class_histograms(meshes: list[MeshData], folder_name: str):
             plt.savefig(f"{folder_name}/hist_{current_class}_D1.png")
             plt.clf()
             current_class = mesh.mesh_class
-        plt.stairs(mesh.D1, mesh.D1_binsize, fill=False)
+        plot_points = []
+        for i in range(len(mesh.D1_binsize)-1):
+            plot_points.append((mesh.D1_binsize[i] + mesh.D1_binsize[i+1]) / 2)
+
+
+
+        plt.plot(plot_points, mesh.D1)
+        #plt.stairs(mesh.D1, mesh.D1_binsize, fill=False)
     plt.savefig(f"{folder_name}/hist_{current_class}_D1.png")
     plt.clf()
+
+
 
     current_class = meshes[0].mesh_class
     for mesh in meshes:
@@ -168,9 +184,18 @@ def render_class_histograms(meshes: list[MeshData], folder_name: str):
             plt.savefig(f"{folder_name}/hist_{current_class}_D2.png")
             plt.clf()
             current_class = mesh.mesh_class
-        plt.stairs(mesh.D2, mesh.D2_binsize, fill=False)
+        plot_points = []
+        for i in range(len(mesh.D2_binsize)-1):
+            plot_points.append((mesh.D2_binsize[i] + mesh.D2_binsize[i+1]) / 2)
+
+
+
+        plt.plot(plot_points, mesh.D2)
+        #plt.stairs(mesh.D2, mesh.D2_binsize, fill=False)
     plt.savefig(f"{folder_name}/hist_{current_class}_D2.png")
     plt.clf()
+
+
 
     current_class = meshes[0].mesh_class
     for mesh in meshes:
@@ -178,9 +203,18 @@ def render_class_histograms(meshes: list[MeshData], folder_name: str):
             plt.savefig(f"{folder_name}/hist_{current_class}_D3.png")
             plt.clf()
             current_class = mesh.mesh_class
-        plt.stairs(mesh.D3, mesh.D3_binsize, fill=False)
+        plot_points = []
+        for i in range(len(mesh.D3_binsize)-1):
+            plot_points.append((mesh.D3_binsize[i] + mesh.D3_binsize[i+1]) / 2)
+
+
+
+        plt.plot(plot_points, mesh.D3)
+        #plt.stairs(mesh.D3, mesh.D3_binsize, fill=False)
     plt.savefig(f"{folder_name}/hist_{current_class}_D3.png")
     plt.clf()
+
+
 
     current_class = meshes[0].mesh_class
     for mesh in meshes:
@@ -188,7 +222,14 @@ def render_class_histograms(meshes: list[MeshData], folder_name: str):
             plt.savefig(f"{folder_name}/hist_{current_class}_D4.png")
             plt.clf()
             current_class = mesh.mesh_class
-        plt.stairs(mesh.D4, mesh.D4_binsize, fill=False)
+        plot_points = []
+        for i in range(len(mesh.D4_binsize)-1):
+            plot_points.append((mesh.D4_binsize[i] + mesh.D4_binsize[i+1]) / 2)
+
+
+
+        plt.plot(plot_points, mesh.D4)
+        #plt.stairs(mesh.D4, mesh.D4_binsize, fill=False)
     plt.savefig(f"{folder_name}/hist_{current_class}_D4.png")
     plt.clf()
 
