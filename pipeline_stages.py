@@ -55,14 +55,8 @@ def NormalizeAlignments(meshes: list[MeshData]) -> list[MeshData]:
 @decorators.cache_result
 def get_global_descriptors(meshes: list[MeshData], descriptor_iterations: int, d1_iterations: int) -> list[MeshData]:
     new_meshes = fast_for(meshes, get_global_descriptor, descriptor_iterations, d1_iterations)
-    return new_meshes
-
-
-@decorators.time_func
-@decorators.cache_result
-def get_shape_properties(meshes: list[MeshData], descriptor_iterations: int) -> list[MeshData]:
-    minmax = get_minmax_shape_properties(meshes)
-    new_meshes = fast_for(meshes, gen_histograms, minmax, descriptor_iterations)
+    minmax = get_minmax_shape_properties(new_meshes)
+    new_meshes = fast_for(new_meshes, gen_histograms, minmax, descriptor_iterations)
     return new_meshes
 
 

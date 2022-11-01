@@ -73,7 +73,6 @@ if __name__ == "__main__":
     meshes = pipeline_stages.remove_models_with_too_many_faces(meshes, 0.95)
 
     meshes = pipeline_stages.get_global_descriptors(meshes, 5000, 5000)
-    meshes = pipeline_stages.get_shape_properties(meshes, 5000)
 
     # Create histograms and database csv
     # mesh_data.summarize_data(meshes, "after_histograms.png", "after_data.csv")
