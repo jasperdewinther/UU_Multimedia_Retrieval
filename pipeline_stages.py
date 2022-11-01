@@ -53,8 +53,8 @@ def NormalizeAlignments(meshes: list[MeshData]) -> list[MeshData]:
 
 @decorators.time_func
 @decorators.cache_result
-def get_global_descriptors(meshes: list[MeshData], descriptor_iterations: int) -> list[MeshData]:
-    new_meshes = fast_for(meshes, get_global_descriptor, descriptor_iterations)
+def get_global_descriptors(meshes: list[MeshData], descriptor_iterations: int, d1_iterations: int) -> list[MeshData]:
+    new_meshes = fast_for(meshes, get_global_descriptor, descriptor_iterations, d1_iterations)
     return new_meshes
 
 
