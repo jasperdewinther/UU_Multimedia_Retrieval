@@ -264,14 +264,14 @@ def get_database_as_feature_matrix(meshes: list[MeshData]) -> ArrayLike:
 
 def get_median_mesh(meshes: list[MeshData], member: str) -> MeshData:
     values = [getattr(mesh, member) for mesh in meshes]
-    return values[np.argsort(values)[len(values) // 2]]
+    return meshes[np.argsort(values)[len(values) // 2]]
 
 
 def get_outlier_high_mesh(meshes: list[MeshData], member: str) -> MeshData:
     values = [getattr(mesh, member) for mesh in meshes]
-    return values[np.argmax(values)]
+    return meshes[np.argmax(values)]
 
 
 def get_outlier_low_mesh(meshes: list[MeshData], member: str) -> MeshData:
     values = [getattr(mesh, member) for mesh in meshes]
-    return values[np.argmin(values)]
+    return meshes[np.argmin(values)]

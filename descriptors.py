@@ -31,9 +31,12 @@ def get_global_descriptor(mesh: MeshData, descriptor_iterations: int, d1_iterati
     triangles = mesh.trimesh_data.vertices.view(np.ndarray)[mesh.trimesh_data.faces]
     triangles = triangles - mesh.trimesh_data.centroid
     crossed = np.cross(triangles[:, 0, :], triangles[:, 1, :])
-    volume = np.sum(
-        triangles[:, 2, 0] * crossed[:, 0] + triangles[:, 2, 1] * crossed[:, 1] + triangles[:, 2, 2] * crossed[:, 2]
-    ) / 6
+    volume = (
+        np.sum(
+            triangles[:, 2, 0] * crossed[:, 0] + triangles[:, 2, 1] * crossed[:, 1] + triangles[:, 2, 2] * crossed[:, 2]
+        )
+        / 6
+    )
 
     compactness = (surface_area**3) / (36 * math.pi * (volume**2))
 
