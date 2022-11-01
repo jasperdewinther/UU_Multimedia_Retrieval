@@ -72,53 +72,6 @@ def GetEigenValuesAndVectors(mesh: Trimesh) -> tuple[ArrayLike, ArrayLike]:
 
 
 def NormalizeAlignment(mesh: MeshData) -> MeshData:
-    # print("old c: ", mesh.trimesh_data.centroid)
-    eigenvalues, eigenvectors = GetEigenValuesAndVectors(mesh.trimesh_data)
-    # eigenvectors = mesh.trimesh_data.principal_inertia_vectors
-    # eigenvalues = mesh.trimesh_data.principal_inertia_components
-
-    ordered_eigenvectors = []
-    ordered_eigenvalues = []
-
-    if eigenvalues[0] > eigenvalues[1]:
-        ordered_eigenvectors.append(eigenvectors[0])
-        ordered_eigenvectors.append(eigenvectors[1])
-        ordered_eigenvalues.append(eigenvalues[0])
-        ordered_eigenvalues.append(eigenvalues[1])
-    else:
-        ordered_eigenvectors.append(eigenvectors[1])
-        ordered_eigenvectors.append(eigenvectors[0])
-        ordered_eigenvalues.append(eigenvalues[1])
-        ordered_eigenvalues.append(eigenvalues[0])
-
-    if eigenvalues[2] > ordered_eigenvalues[0]:
-        ordered_eigenvectors.insert(0, eigenvectors[2])
-        ordered_eigenvalues.insert(0, eigenvalues[2])
-    elif eigenvalues[2] > ordered_eigenvalues[1]:
-        ordered_eigenvectors.insert(1, eigenvectors[2])
-        ordered_eigenvalues.insert(1, eigenvalues[2])
-    else:
-        ordered_eigenvectors.insert(2, eigenvectors[2])
-        ordered_eigenvalues.insert(2, eigenvalues[2])
-
-    for vertex in mesh.trimesh_data.vertices:
-        # print("old", vertex)
-        new_vertex = [0, 0, 0]
-        new_vertex[0] = np.dot(vertex, ordered_eigenvectors[0])
-        new_vertex[1] = np.dot(vertex, ordered_eigenvectors[1])
-        new_vertex[2] = np.dot(vertex, np.cross(ordered_eigenvectors[0], ordered_eigenvectors[1]))
-
-        vertex[0] = new_vertex[0]
-        vertex[1] = new_vertex[1]
-        vertex[2] = new_vertex[2]
-        # print("new", vertex)
-
-    # print("new c: ", mesh.trimesh_data.centroid)
-
-    return mesh
-
-
-def NormalizeAlignment(mesh: MeshData) -> MeshData:
     eigenvalues, eigenvectors = GetEigenValuesAndVectors(mesh.trimesh_data)
     # mesh.trimesh_data = mesh.trimesh_data.apply_transform(mesh.trimesh_data.principal_inertia_transform)
     # eigenvectors = mesh.trimesh_data.principal_inertia_vectors

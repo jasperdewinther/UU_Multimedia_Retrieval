@@ -31,9 +31,13 @@ def get_global_descriptor(mesh: MeshData, descriptor_iterations: int) -> MeshDat
     triangles = mesh.trimesh_data.vertices.view(np.ndarray)[mesh.trimesh_data.faces]
     triangles = triangles - mesh.trimesh_data.centroid
     crossed = np.cross(triangles[:, 0, :], triangles[:, 1, :])
-    volume = np.sum(
-        triangles[:, 2, 0] * crossed[:, 0] + triangles[:, 2, 1] * crossed[:, 1] + triangles[:, 2, 2] * crossed[:, 2]
+    volume = (
+        np.sum(
+            triangles[:, 2, 0] * crossed[:, 0] + triangles[:, 2, 1] * crossed[:, 1] + triangles[:, 2, 2] * crossed[:, 2]
+        )
+        / 6.0
     )
+    # volume = mesh.trimesh_data.volume
 
     compactness = (surface_area**3) / (36 * math.pi * (volume**2))
 
@@ -51,7 +55,7 @@ def get_global_descriptor(mesh: MeshData, descriptor_iterations: int) -> MeshDat
 
     # eccentricity
     eigenvalues = mesh.trimesh_data.principal_inertia_components
-    eccentricity = max(eigenvalues) - min(eigenvalues)
+    eccentricity = max(eigenvalues) / min(eigenvalues)
 
     # shape properties
     mesh.mesh_class = class_shape

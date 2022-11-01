@@ -16,7 +16,7 @@ import query
 import matplotlib.pyplot as plt
 import pipeline_stages
 
-PARALLEL_FOR_LOOP = False
+PARALLEL_FOR_LOOP = True
 
 
 if __name__ == "__main__":
@@ -24,10 +24,23 @@ if __name__ == "__main__":
     meshes = mesh_io.get_all_obj_files("./assets/")
 
     # Reduce dataset for faster computation
-    meshes = meshes[:200]
 
     # Load all meshes into ram
     meshes = pipeline_stages.get_all_meshes(meshes)
+    # meshes = pipeline_stages.get_global_descriptors(meshes, 1000)
+
+    # max_index = mesh_data.get_outlier_high_mesh(meshes, "broken_faces_count")
+    # median_index = mesh_data.get_median_mesh(meshes, "broken_faces_count")
+    # min_index = mesh_data.get_outlier_low_mesh(meshes, "broken_faces_count")
+    # print(max_index, median_index, min_index)
+    ## Select meshes to render
+    # torender = [
+    #    max_index,
+    # ]
+    # print(torender)
+    #
+    ## Render selected meshes
+    # renderer.render_meshes(torender)
 
     meshes = pipeline_stages.remove_nan_inf_models(meshes)
 
@@ -69,17 +82,7 @@ if __name__ == "__main__":
 
     # nearest = query.query_knn(meshes[654], meshes, knn, 5)
     # print(nearest)
-
-    # Select meshes to render
-    torender = [
-        meshes[mesh_data.get_outlier_high_mesh(meshes, "broken_faces_count")],
-        meshes[mesh_data.get_median_mesh(meshes, "broken_faces_count")],
-        meshes[mesh_data.get_outlier_low_mesh(meshes, "broken_faces_count")],
-    ]
-    print(torender)
-
-    # Render selected meshes
-    renderer.render_meshes(torender)
+    print([mesh for mesh in meshes if "m100.obj" in mesh.filename or "m702.obj" in mesh.filename])
 
     window = initGUI()
 
