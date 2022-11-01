@@ -69,22 +69,26 @@ if __name__ == "__main__":
     #    meshes, 100, 'broken_faces_count', 'broken_faces_count_hist_before.png')
 
     # Remove meshes which contain nan or inf values and throw away a portion of the dataset with the highest ratio of broken faces
-    # meshes = pipeline_stages.remove_models_with_holes(meshes, 0.9)
-    # meshes = pipeline_stages.remove_models_with_too_many_faces(meshes, 0.95)
+    meshes = pipeline_stages.remove_models_with_holes(meshes, 0.9)
+    meshes = pipeline_stages.remove_models_with_too_many_faces(meshes, 0.95)
 
-    meshes = pipeline_stages.get_global_descriptors(meshes, 100000, 5000)
-    # meshes = pipeline_stages.get_shape_properties(meshes, 1000000)
+    meshes = pipeline_stages.get_global_descriptors(meshes, 5000, 5000)
+    meshes = pipeline_stages.get_shape_properties(meshes, 5000)
 
     # Create histograms and database csv
-    mesh_data.summarize_data(meshes, "after_histograms.png", "after_data.csv")
-    mesh_data.render_class_histograms(meshes, "histograms_after/")
+    # mesh_data.summarize_data(meshes, "after_histograms.png", "after_data.csv")
+    # mesh_data.render_class_histograms(meshes, "histograms_after/")
 
-    # knn = query.create_knn_structure(meshes, 5)
+    knn = query.create_knn_structure(meshes, 50)
 
-    # nearest = query.query_knn(meshes[654], meshes, knn, 5)
-    # print(nearest)
-    print([mesh for mesh in meshes if "m100.obj" in mesh.filename or "m702.obj" in mesh.filename])
+    sword = [mesh for mesh in meshes if "m702.obj" in mesh.filename][0]
+    pig = [mesh for mesh in meshes if "m100.obj" in mesh.filename][0]
 
+    nearest = query.query_knn(pig, meshes, knn, 50)
+    nearest = sorted(nearest, key=lambda x: x[1])
+    [print(mesh[1]) for mesh in nearest]
+    torender = [mesh[0] for mesh in nearest]
+    renderer.render_meshes(torender)
     window = initGUI()
 
 # while True:                             # The Event Loop
