@@ -5,7 +5,7 @@ from fast_func import fast_for, filter_fraction, filter_global
 from mesh_io import set_trimesh
 from mesh_normalize import remesh
 from filter_io import get_broken_faces_fraction, get_face_count, remove_nan_inf_model
-from normalization import NormalizeAlignment, NormalizeScale, NormalizeTranslation
+from normalization import NormalizeAlignment, NormalizeScale, NormalizeTranslation, NormalizeFlip
 
 
 @decorators.time_func
@@ -48,6 +48,13 @@ def NormalizeScales(meshes: list[MeshData]) -> list[MeshData]:
 @decorators.cache_result
 def NormalizeAlignments(meshes: list[MeshData]) -> list[MeshData]:
     new_meshes = fast_for(meshes, NormalizeAlignment)
+    return new_meshes
+
+
+@decorators.time_func
+@decorators.cache_result
+def NormalizeFlips(meshes: list[MeshData]) -> list[MeshData]:
+    new_meshes = fast_for(meshes, NormalizeFlip)
     return new_meshes
 
 

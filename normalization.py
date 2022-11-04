@@ -7,6 +7,7 @@ import decorators
 import descriptors
 import math
 import random
+import trimesh
 
 
 def GetBaryCenter(mesh: Trimesh) -> ArrayLike:
@@ -68,7 +69,30 @@ def GetEigenValuesAndVectors(mesh: Trimesh) -> tuple[ArrayLike, ArrayLike]:
 
     eigenvalues, eigenvectors = np.linalg.eig(A_cov)
 
-    return eigenvalues, eigenvectors
+    ordered_eigenvectors = []
+    ordered_eigenvalues = []
+
+    if eigenvalues[0] > eigenvalues[1]:
+        ordered_eigenvectors.append(eigenvectors[0])
+        ordered_eigenvectors.append(eigenvectors[1])
+        ordered_eigenvalues.append(eigenvalues[0])
+        ordered_eigenvalues.append(eigenvalues[1])
+    else:
+        ordered_eigenvectors.append(eigenvectors[1])
+        ordered_eigenvectors.append(eigenvectors[0])
+        ordered_eigenvalues.append(eigenvalues[1])
+        ordered_eigenvalues.append(eigenvalues[0])
+    if eigenvalues[2] > ordered_eigenvalues[0]:
+        ordered_eigenvectors.insert(0, eigenvectors[2])
+        ordered_eigenvalues.insert(0, eigenvalues[2])
+    elif eigenvalues[2] > ordered_eigenvalues[1]:
+        ordered_eigenvectors.insert(1, eigenvectors[2])
+        ordered_eigenvalues.insert(1, eigenvalues[2])
+    else:
+        ordered_eigenvectors.insert(2, eigenvectors[2])
+        ordered_eigenvalues.insert(2, eigenvalues[2])
+
+    return ordered_eigenvalues, ordered_eigenvectors
 
 
 def NormalizeAlignment(mesh: MeshData) -> MeshData:
@@ -117,6 +141,18 @@ def NormalizeAlignment(mesh: MeshData) -> MeshData:
 
     return mesh
 
+def NormalizeFlip(mesh: MeshData) -> MeshData:
+    xScale = np.sign(mesh.trimesh_data.center_mass[0])
+    yScale = np.sign(mesh.trimesh_data.center_mass[1])
+    zScale = np.sign(mesh.trimesh_data.center_mass[2])
+
+    for vertex in mesh.trimesh_data.vertices:
+        vertex[0] *= xScale
+        vertex[1] *= yScale
+        vertex[2] *= zScale
+
+    mesh.trimesh_data.fix_normals()
+    return mesh
 
 def RandomlySamplePointsOverMesh(mesh: Trimesh, sampleCount: int) -> tuple[float, float, float]:
     vertices = []
@@ -130,7 +166,7 @@ def RandomlySamplePointsOverMesh(mesh: Trimesh, sampleCount: int) -> tuple[float
         # centroid = (v0 + v1 + v2) / 3
 
         cross = np.cross(v0 - v1, v0 - v2)
-        area = math.sqrt(cross[0] ** 2 + cross[2] ** 2 + cross[2] ** 2) / 2
+        area = math.sqrt(cross[0] ** 2 + cross[1] ** 2 + cross[2] ** 2) / 2
         triangles.append((v0, v1, v2, area))
         total_area += area
 
