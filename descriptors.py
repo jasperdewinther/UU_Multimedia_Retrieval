@@ -15,6 +15,7 @@ from typing import Union
 import time
 import matplotlib.pyplot as plt
 from numpy.typing import ArrayLike
+import normalization
 
 
 def get_global_descriptor(mesh: MeshData, descriptor_iterations: int, d1_iterations: int) -> MeshData:
@@ -56,6 +57,8 @@ def get_global_descriptor(mesh: MeshData, descriptor_iterations: int, d1_iterati
     eigenvalues = mesh.trimesh_data.principal_inertia_components
     eccentricity = max(eigenvalues) / min(eigenvalues)
 
+    nothing, eigenvectors = normalization.GetEigenValuesAndVectors(mesh.trimesh_data)
+
     # shape properties
     mesh.mesh_class = class_shape
     A3, D1, D2, D3, D4 = get_shape_properties(mesh, descriptor_iterations, d1_iterations)
@@ -73,6 +76,7 @@ def get_global_descriptor(mesh: MeshData, descriptor_iterations: int, d1_iterati
     mesh.rectangularity = rectangularity
     mesh.diameter = diameter
     mesh.eccentricity = eccentricity
+    mesh.eigenvector_offset = abs(np.dot(eigenvectors[0], [1, 0, 0]))
     mesh.barycenter_dist_to_origin = math.dist([0, 0, 0], mesh.trimesh_data.centroid)
     mesh.A3 = A3
     mesh.D1 = D1

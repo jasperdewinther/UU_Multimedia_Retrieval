@@ -16,6 +16,7 @@ class MeshData:
     vertex_count: int
     face_count: int
     surface_area: float
+    volume: float
     compactness: float
     aabb_volume: float
     obb_volume: float
@@ -25,6 +26,7 @@ class MeshData:
     eccentricity: float
     broken_faces_count: int
     barycenter_dist_to_origin: float
+    eigenvector_offset: float #cos of angle between x-axis and major eigenvector
     A3: ArrayLike
     A3_binsize: ArrayLike
     D1: ArrayLike
@@ -44,6 +46,7 @@ class MeshData:
         self.vertex_count = 0
         self.face_count = 0
         self.surface_area = 0
+        self.volume = None
         self.compactness = 0
         self.aabb_volume = 0
         self.obb_volume = 0
@@ -107,12 +110,13 @@ def summarize_data(meshes: list[MeshData], figure_filename: str = None, csv_file
             "compactness": [mesh.compactness],
             "aabb_volume": [mesh.aabb_volume],
             "obb_volume": [mesh.obb_volume],
-            "aaobb_volume_ratio": [mesh.aaobb_volume_ratio],
             "diameter": [mesh.diameter],
             "broken_faces_count": [mesh.broken_faces_count],
             "barycenter_dist_to_origin": [mesh.barycenter_dist_to_origin],
+            "cosine_of_angle_major_eigenvector_and_x-axis": [mesh.eigenvector_offset]
         }
         df = pd.concat((pd.DataFrame.from_dict(data), df), ignore_index=True)
+    print(df.describe())
     df.hist(bins=100, figsize=(20, 14))  # s is an instance of Series
     df.round(3)
     print(df.describe().to_latex())

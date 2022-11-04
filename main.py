@@ -45,9 +45,9 @@ if __name__ == "__main__":
 
     meshes = pipeline_stages.remove_nan_inf_models(meshes)
 
-    # meshes = descriptors.get_global_descriptors(meshes, 1000)
-    # mesh_data.render_class_histograms(meshes, "histograms/")
-    # mesh_data.summarize_data(meshes, "before_histograms.png", "before_data.csv")
+    meshes = pipeline_stages.get_global_descriptors(meshes, 1, 1)
+    #mesh_data.render_class_histograms(meshes, "histograms/")
+    mesh_data.summarize_data(meshes, "before_histograms.png", "before_data.csv")
 
     # Remesh all meshes, change the number of faces to fit in range
     meshes = pipeline_stages.remesh_all_meshes(meshes, 1000, 5000)
@@ -61,6 +61,9 @@ if __name__ == "__main__":
     # Normalize object alignment
     meshes = pipeline_stages.NormalizeAlignments(meshes)
 
+    # Flipping objects
+    meshes = pipeline_stages.NormalizeFlips(meshes)
+
     # Calculate global descriptor
     meshes = pipeline_stages.get_global_descriptors(meshes, 1, 1)
     # meshes = pipeline_stages.get_shape_properties(meshes, 5000)
@@ -71,24 +74,30 @@ if __name__ == "__main__":
     # Remove meshes which contain nan or inf values and throw away a portion of the dataset with the highest ratio of broken faces
     meshes = pipeline_stages.remove_models_with_holes(meshes, 0.9)
     meshes = pipeline_stages.remove_models_with_too_many_faces(meshes, 0.95)
-
-    meshes = pipeline_stages.get_global_descriptors(meshes, 5000, 5000)
+    meshes = pipeline_stages.get_global_descriptors(meshes, 1, 1)
+    #meshes = pipeline_stages.get_global_descriptors(meshes, 100000, 10000)
 
     # Create histograms and database csv
-    # mesh_data.summarize_data(meshes, "after_histograms.png", "after_data.csv")
-    # mesh_data.render_class_histograms(meshes, "histograms_after/")
+    mesh_data.summarize_data(meshes, "after_histograms.png", "after_data.csv")
+    mesh_data.render_class_histograms(meshes, "histograms_after/")
 
-    knn = query.create_knn_structure(meshes, 50)
+    #meshes[191] = normalization.NormalizeFlip(meshes[191])
+    # torender = meshes[190:200]
+    # #torender = [meshes[191]]
+    # renderer.render_meshes(torender)
+    # windor = initGUI()
 
-    sword = [mesh for mesh in meshes if "m702.obj" in mesh.filename][0]
-    pig = [mesh for mesh in meshes if "m100.obj" in mesh.filename][0]
+    # knn = query.create_knn_structure(meshes, 50)
 
-    nearest = query.query_knn(pig, meshes, knn, 50)
-    nearest = sorted(nearest, key=lambda x: x[1])
-    [print(mesh[1]) for mesh in nearest]
-    torender = [mesh[0] for mesh in nearest]
-    renderer.render_meshes(torender)
-    window = initGUI()
+    # sword = [mesh for mesh in meshes if "m702.obj" in mesh.filename][0]
+    # pig = [mesh for mesh in meshes if "m100.obj" in mesh.filename][0]
+
+    # nearest = query.query_knn(pig, meshes, knn, 50)
+    # nearest = sorted(nearest, key=lambda x: x[1])
+    # [print(mesh[1]) for mesh in nearest]
+    # torender = [mesh[0] for mesh in nearest]
+    # renderer.render_meshes(torender)
+    # window = initGUI()
 
 # while True:                             # The Event Loop
 #    if not HandleGUIEvents(window):
