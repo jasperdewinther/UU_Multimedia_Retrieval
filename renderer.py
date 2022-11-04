@@ -24,7 +24,7 @@ def build_scene(meshes: list[MeshData], scene: Scene):
         position = np.eye((4))
         position[:3, 3] = [
             (i % columns_and_rows) - columns_and_rows / 2,
-            (i / columns_and_rows) - columns_and_rows / 2,
+            columns_and_rows / 2 - (i / columns_and_rows),
             -5,
         ]
         node.matrix = position

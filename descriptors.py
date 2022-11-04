@@ -112,7 +112,7 @@ def get_minmax_shape_properties(meshes: list[MeshData]) -> list[float]:
     return [minA3, maxA3, minD1, maxD1, minD2, maxD2, minD3, maxD3, minD4, maxD4]
 
 
-def gen_histograms(mesh: MeshData, min_max: list[float], descriptor_iterations: int, d1_iterations: int):
+def gen_histograms(mesh: MeshData, min_max: list[float]):
     minA3 = min_max[0]
     maxA3 = min_max[1]
     minD1 = min_max[2]
@@ -124,33 +124,23 @@ def gen_histograms(mesh: MeshData, min_max: list[float], descriptor_iterations: 
     minD4 = min_max[8]
     maxD4 = min_max[9]
 
-    counts, bin_sizes = np.histogram(
-        mesh.A3, math.floor(descriptor_iterations ** (1 / 2)), [math.floor(minA3), math.ceil(maxA3)]
-    )
+    counts, bin_sizes = np.histogram(mesh.A3, 100, [math.floor(minA3), math.ceil(maxA3)])
     mesh.A3 = counts
     mesh.A3_binsize = bin_sizes
 
-    counts, bin_sizes = np.histogram(
-        mesh.D1, math.floor(d1_iterations ** (1 / 2)), [math.floor(minD1), math.ceil(maxD1)]
-    )
+    counts, bin_sizes = np.histogram(mesh.D1, 100, [math.floor(minD1), math.ceil(maxD1)])
     mesh.D1 = counts
     mesh.D1_binsize = bin_sizes
 
-    counts, bin_sizes = np.histogram(
-        mesh.D2, math.floor(descriptor_iterations ** (1 / 2)), [math.floor(minD2), math.ceil(maxD2)]
-    )
+    counts, bin_sizes = np.histogram(mesh.D2, 100, [math.floor(minD2), math.ceil(maxD2)])
     mesh.D2 = counts
     mesh.D2_binsize = bin_sizes
 
-    counts, bin_sizes = np.histogram(
-        mesh.D3, math.floor(descriptor_iterations ** (1 / 2)), [math.floor(minD3), math.ceil(maxD3)]
-    )
+    counts, bin_sizes = np.histogram(mesh.D3, 100, [math.floor(minD3), math.ceil(maxD3)])
     mesh.D3 = counts
     mesh.D3_binsize = bin_sizes
 
-    counts, bin_sizes = np.histogram(
-        mesh.D4, math.floor(descriptor_iterations ** (1 / 2)), [math.floor(minD4), math.ceil(maxD4)]
-    )
+    counts, bin_sizes = np.histogram(mesh.D4, 100, [math.floor(minD4), math.ceil(maxD4)])
     mesh.D4 = counts
     mesh.D4_binsize = bin_sizes
     return mesh

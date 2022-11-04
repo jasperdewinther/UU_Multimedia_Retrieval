@@ -12,7 +12,7 @@ import trimesh
 def remove_nan_inf_model(mesh: MeshData) -> bool:
     volume_tri = mesh.trimesh_data.volume
 
-    #our volume calculations
+    # our volume calculations
     triangles = mesh.trimesh_data.vertices.view(np.ndarray)[mesh.trimesh_data.faces]
     triangles = triangles - mesh.trimesh_data.centroid
     crossed = np.cross(triangles[:, 0, :], triangles[:, 1, :])
@@ -38,7 +38,6 @@ def remove_nan_inf_model(mesh: MeshData) -> bool:
 
 
 def get_broken_faces_fraction(mesh: MeshData) -> float:
-    print(type(mesh))
     return mesh.broken_faces_count / mesh.face_count
 
 

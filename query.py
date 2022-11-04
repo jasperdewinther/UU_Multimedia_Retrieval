@@ -1,5 +1,6 @@
 from turtle import distance
 from xml.sax.handler import feature_external_ges
+from matplotlib import pyplot as plt
 from numpy.typing import ArrayLike
 from numpy import float32
 from mesh_data import MeshData, get_database_as_feature_matrix, get_feature_vector
@@ -21,6 +22,11 @@ def emd_np(a, b):
 
 
 def mesh_distance(mesh_1: ArrayLike, mesh_2: ArrayLike) -> float32:
+    distances = get_distances(mesh_1, mesh_2)
+    return np.sum(distances)
+
+
+def get_distances(mesh_1: ArrayLike, mesh_2: ArrayLike) -> ArrayLike:
     simple = 5
     hist = (mesh_1.shape[0] - simple) / 5
     index_0 = int(simple + hist * 0)
@@ -30,15 +36,20 @@ def mesh_distance(mesh_1: ArrayLike, mesh_2: ArrayLike) -> float32:
     index_4 = int(simple + hist * 4)
     index_5 = int(simple + hist * 5)
 
-    distance = (
-        np.sum((mesh_1[:simple] - mesh_2[:simple]) ** 2)
-        + emd_np(mesh_1[index_0:index_1], mesh_2[index_0:index_1]) ** 2
-        + emd_np(mesh_1[index_1:index_2], mesh_2[index_1:index_2]) ** 2
-        + emd_np(mesh_1[index_2:index_3], mesh_2[index_2:index_3]) ** 2
-        + emd_np(mesh_1[index_3:index_4], mesh_2[index_3:index_4]) ** 2
-        + emd_np(mesh_1[index_4:index_5], mesh_2[index_4:index_5]) ** 2
+    distances = (
+        np.hstack(
+            [
+                (mesh_1[:simple] - mesh_2[:simple]),
+                emd_np(mesh_1[index_0:index_1], mesh_2[index_0:index_1]),
+                emd_np(mesh_1[index_1:index_2], mesh_2[index_1:index_2]),
+                emd_np(mesh_1[index_2:index_3], mesh_2[index_2:index_3]),
+                emd_np(mesh_1[index_3:index_4], mesh_2[index_3:index_4]),
+                emd_np(mesh_1[index_4:index_5], mesh_2[index_4:index_5]),
+            ]
+        )
+        ** 2
     )
-    return distance
+    return distances
 
 
 @decorators.time_func
@@ -53,7 +64,9 @@ def create_knn_structure(meshes: list[MeshData], k: int) -> NearestNeighbors:
     return neigh
 
 
-def query_knn(mesh: MeshData, meshes: list[MeshData], knn: NearestNeighbors, k: int) -> list[tuple[MeshData, float]]:
+def query_knn(
+    mesh: MeshData, meshes: list[MeshData], knn: NearestNeighbors, k: int
+) -> list[tuple[MeshData, float, ArrayLike]]:
     feature_vector = get_feature_vector(mesh)
     feature_vector = feature_vector.reshape(1, -1)
     distances, indices = knn.kneighbors(feature_vector)
@@ -61,5 +74,49 @@ def query_knn(mesh: MeshData, meshes: list[MeshData], knn: NearestNeighbors, k: 
     indices = indices.reshape(-1)
     results = []
     for i in range(len(indices)):
-        results.append((meshes[indices[i]], distances[i]))
+        vec_other = get_feature_vector(meshes[indices[i]])
+        results.append((meshes[indices[i]], distances[i], get_distances(get_feature_vector(mesh), vec_other)))
     return results
+
+
+def show_distances(query_data: list[tuple[MeshData, float, ArrayLike]]):
+    dict_form = {data[0].filename: data[2] for data in query_data}
+    fig, ax = plt.subplots()
+    bar_plot(ax, dict_form, total_width=0.8, single_width=0.9)
+    plt.show()
+    plt.clf()
+
+
+def bar_plot(ax, data, colors=None, total_width=0.8, single_width=1, legend=True):
+
+    # Check if colors where provided, otherwhise use the default color cycle
+    if colors is None:
+        colors = plt.rcParams["axes.prop_cycle"].by_key()["color"]
+
+    # Number of bars per group
+    n_bars = len(data)
+
+    # The width of a single bar
+    bar_width = total_width / n_bars
+
+    # List containing handles for the drawn bars, used for the legend
+    bars = []
+
+    # Iterate over all data
+    for i, (name, values) in enumerate(data.items()):
+        # The offset in x direction of that bar
+        x_offset = (i - n_bars / 2) * bar_width + bar_width / 2
+
+        # Draw a bar for every value of that type
+        for x, y in enumerate(values):
+            bar = ax.bar(x + x_offset, y, width=bar_width * single_width, color=colors[i % len(colors)])
+
+        # Add a handle to the last drawn bar, which we'll need for the legend
+        bars.append(bar[0])
+    data_width = len(next(iter(data.items()))[1])
+    plt.xticks(
+        np.arange(data_width) + bar_width,
+        ["surface_area", "compactness", "rectangularity", "diameter", "eccentricity", "A3", "D1", "D2", "D3", "D4"],
+    )
+    # Draw legend if we need
+    ax.legend(bars, data.keys())

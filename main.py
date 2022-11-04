@@ -45,10 +45,6 @@ if __name__ == "__main__":
 
     meshes = pipeline_stages.remove_nan_inf_models(meshes)
 
-    meshes = pipeline_stages.get_global_descriptors(meshes, 1, 1)
-    # mesh_data.render_class_histograms(meshes, "histograms/")
-    mesh_data.summarize_data(meshes, "before_histograms.png", "before_data.csv")
-
     # Remesh all meshes, change the number of faces to fit in range
     meshes = pipeline_stages.remesh_all_meshes(meshes, 1000, 5000)
 
@@ -78,8 +74,8 @@ if __name__ == "__main__":
     meshes, minmax_data = pipeline_stages.get_global_descriptors(meshes, 5000, 5000)
 
     # Create histograms and database csv
-    mesh_data.summarize_data(meshes, "after_histograms.png", "after_data.csv")
-    mesh_data.render_class_histograms(meshes, "histograms_after/")
+    # mesh_data.summarize_data(meshes, "after_histograms.png", "after_data.csv")
+    # mesh_data.render_class_histograms(meshes, "histograms_after/")
 
     # meshes[191] = normalization.NormalizeFlip(meshes[191])
     # torender = meshes[190:200]
@@ -87,7 +83,7 @@ if __name__ == "__main__":
     # renderer.render_meshes(torender)
     # windor = initGUI()
 
-    # knn = query.create_knn_structure(meshes, 50)
+    knn = query.create_knn_structure(meshes, 9)
 
     # sword = [mesh for mesh in meshes if "m702.obj" in mesh.filename][0]
     # pig = [mesh for mesh in meshes if "m100.obj" in mesh.filename][0]
@@ -97,7 +93,7 @@ if __name__ == "__main__":
     # [print(mesh[1]) for mesh in nearest]
     # torender = [mesh[0] for mesh in nearest]
     # renderer.render_meshes(torender)
-    # window = initGUI()
+    window = initGUI()
 
     while True:  # The Event Loop
         event_return = HandleGUIEvents(window, minmax_data)
@@ -105,7 +101,9 @@ if __name__ == "__main__":
             if not event_return:
                 break
         if isinstance(event_return, mesh_data.MeshData):
-            nearest = query.query_knn(event_return, meshes, knn, 50)
+            nearest = query.query_knn(event_return, meshes, knn, 9)
+            # [0] = mesh, [1] = distance, [2] individual dist per component
+            query.show_distances(nearest)
             nearest = sorted(nearest, key=lambda x: x[1])
             torender = [mesh[0] for mesh in nearest]
             viewer = renderer.render_meshes(torender)

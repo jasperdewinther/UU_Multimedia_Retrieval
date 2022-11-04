@@ -65,7 +65,7 @@ def get_global_descriptors(
 ) -> tuple[list[MeshData], list[float]]:
     new_meshes = fast_for(meshes, get_global_descriptor, descriptor_iterations, d1_iterations)
     minmax = get_minmax_shape_properties(new_meshes)
-    new_meshes = fast_for(new_meshes, gen_histograms, minmax, descriptor_iterations)
+    new_meshes = fast_for(new_meshes, gen_histograms, minmax)
     return new_meshes, minmax
 
 

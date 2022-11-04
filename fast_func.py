@@ -42,7 +42,5 @@ def filter_global(meshes: list[MeshData], func: Callable, *arguments) -> list[Me
 def filter_fraction(meshes: list[MeshData], func: Callable, fraction: float, *arguments) -> list[MeshData]:
     values = [func(mesh, *arguments) for mesh in meshes]
     values.sort()
-    print(fraction)
-    print(int((len(values) - 1) * fraction))
     cutoff = values[int((len(values) - 1) * fraction)]
     return [mesh for mesh in meshes if func(mesh, *arguments) <= cutoff]
