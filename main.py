@@ -94,6 +94,7 @@ if __name__ == "__main__":
     # torender = [mesh[0] for mesh in nearest]
     # renderer.render_meshes(torender)
     window = initGUI()
+    query.get_mean_std(meshes)
 
     while True:  # The Event Loop
         event_return = HandleGUIEvents(window, minmax_data)

@@ -52,6 +52,15 @@ def get_distances(mesh_1: ArrayLike, mesh_2: ArrayLike) -> ArrayLike:
     return distances
 
 
+def get_mean_std(meshes: list[MeshData]) -> ArrayLike:
+    features = get_database_as_feature_matrix(meshes)
+    mean = np.mean(features, axis=0)
+    std = np.std(features, axis=0)
+    print(mean, std)
+    print(mean.shape, std.shape)
+    return mean, std
+
+
 @decorators.time_func
 @decorators.cache_result
 def create_knn_structure(meshes: list[MeshData], k: int) -> NearestNeighbors:
