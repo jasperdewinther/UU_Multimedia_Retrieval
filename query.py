@@ -54,16 +54,12 @@ def create_knn_structure(meshes: list[MeshData], k: int) -> NearestNeighbors:
 
 
 def query_knn(mesh: MeshData, meshes: list[MeshData], knn: NearestNeighbors, k: int) -> list[tuple[MeshData, float]]:
-    print(get_database_as_feature_matrix(meshes).shape)
     feature_vector = get_feature_vector(mesh)
     feature_vector = feature_vector.reshape(1, -1)
-    print(feature_vector.shape)
     distances, indices = knn.kneighbors(feature_vector)
     distances = distances.reshape(-1)
     indices = indices.reshape(-1)
-    print(distances.shape, indices.shape)
     results = []
     for i in range(len(indices)):
-        print(i, indices[i], distances[i], meshes[indices[i]])
         results.append((meshes[indices[i]], distances[i]))
     return results

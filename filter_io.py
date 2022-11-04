@@ -23,6 +23,7 @@ def remove_nan_inf_model(mesh: MeshData) -> bool:
 
 
 def get_broken_faces_fraction(mesh: MeshData) -> float:
+    print(type(mesh))
     return mesh.broken_faces_count / mesh.face_count
 
 

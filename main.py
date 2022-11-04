@@ -62,7 +62,7 @@ if __name__ == "__main__":
     meshes = pipeline_stages.NormalizeAlignments(meshes)
 
     # Calculate global descriptor
-    meshes = pipeline_stages.get_global_descriptors(meshes, 1, 1)
+    meshes, _ = pipeline_stages.get_global_descriptors(meshes, 1, 1)
     # meshes = pipeline_stages.get_shape_properties(meshes, 5000)
 
     # mesh_data.render_histogram(
@@ -72,7 +72,7 @@ if __name__ == "__main__":
     meshes = pipeline_stages.remove_models_with_holes(meshes, 0.9)
     meshes = pipeline_stages.remove_models_with_too_many_faces(meshes, 0.95)
 
-    meshes = pipeline_stages.get_global_descriptors(meshes, 5000, 5000)
+    meshes, minmax_data = pipeline_stages.get_global_descriptors(meshes, 5000, 5000)
 
     # Create histograms and database csv
     # mesh_data.summarize_data(meshes, "after_histograms.png", "after_data.csv")
@@ -83,15 +83,22 @@ if __name__ == "__main__":
     sword = [mesh for mesh in meshes if "m702.obj" in mesh.filename][0]
     pig = [mesh for mesh in meshes if "m100.obj" in mesh.filename][0]
 
-    nearest = query.query_knn(pig, meshes, knn, 50)
+    nearest = query.query_knn(sword, meshes, knn, 50)
     nearest = sorted(nearest, key=lambda x: x[1])
-    [print(mesh[1]) for mesh in nearest]
     torender = [mesh[0] for mesh in nearest]
-    renderer.render_meshes(torender)
+    viewer = renderer.render_meshes(torender)
     window = initGUI()
 
-# while True:                             # The Event Loop
-#    if not HandleGUIEvents(window):
-#        break
+    while True:  # The Event Loop
+        event_return = HandleGUIEvents(window, minmax_data)
+        if isinstance(event_return, bool):
+            if not event_return:
+                break
+        if isinstance(event_return, mesh_data.MeshData):
+            nearest = query.query_knn(event_return, meshes, knn, 50)
+            nearest = sorted(nearest, key=lambda x: x[1])
+            torender = [mesh[0] for mesh in nearest]
+            viewer = renderer.render_meshes(torender)
 
-# window.close()
+    viewer.close()
+    window.close()
