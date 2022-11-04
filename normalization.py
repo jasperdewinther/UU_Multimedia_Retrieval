@@ -142,40 +142,15 @@ def NormalizeAlignment(mesh: MeshData) -> MeshData:
     return mesh
 
 def NormalizeFlip(mesh: MeshData) -> MeshData:
-    # Fx = Fy = Fz = 0
-
-    # for face in mesh.trimesh_data.faces:
-    #     v0 = mesh.trimesh_data.vertices[face[0]]
-    #     v1 = mesh.trimesh_data.vertices[face[1]]
-    #     v2 = mesh.trimesh_data.vertices[face[2]]
-        
-    #     cross = np.cross(v0 - v1, v0 - v2)
-    #     area = math.sqrt(cross[0] ** 2 + cross[1] ** 2 + cross[2] ** 2) / 2
-
-    #     centroid = (v0 + v1 + v2) / 3
-    #     centroid *= area
-
-    #     Fx += np.sign(centroid[0]) * (centroid[0] ** 2)
-    #     Fy += np.sign(centroid[1]) * (centroid[1] ** 2)
-    #     Fz += np.sign(centroid[2]) * (centroid[2] ** 2)
-
-    # xScale = np.sign(Fx)
-    # yScale = np.sign(Fy)
-    # zScale = np.sign(Fz)
     xScale = np.sign(mesh.trimesh_data.center_mass[0])
     yScale = np.sign(mesh.trimesh_data.center_mass[1])
     zScale = np.sign(mesh.trimesh_data.center_mass[2])
-    # print(mesh.trimesh_data.centroid)
-    # print(mesh.trimesh_data.center_mass)
-    # print(xScale, " ", yScale, " ", zScale, " ")
-    # print(mesh.trimesh_data.vertices[0][1])
 
     for vertex in mesh.trimesh_data.vertices:
         vertex[0] *= xScale
         vertex[1] *= yScale
         vertex[2] *= zScale
 
-    # print(mesh.trimesh_data.vertices[0][1])
     mesh.trimesh_data.fix_normals()
     return mesh
 
