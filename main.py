@@ -94,7 +94,7 @@ if __name__ == "__main__":
     # torender = [mesh[0] for mesh in nearest]
     # renderer.render_meshes(torender)
     window = initGUI()
-    query.get_mean_std(meshes)
+    data_mean, data_std = query.get_mean_std(mesh_data.get_database_as_feature_matrix(meshes))
 
     while True:  # The Event Loop
         event_return = HandleGUIEvents(window, minmax_data)
@@ -102,7 +102,7 @@ if __name__ == "__main__":
             if not event_return:
                 break
         if isinstance(event_return, mesh_data.MeshData):
-            nearest = query.query_knn(event_return, meshes, knn, 9)
+            nearest = query.query_knn(event_return, meshes, knn, data_mean, data_std)
             # [0] = mesh, [1] = distance, [2] individual dist per component
             query.show_distances(nearest)
             nearest = sorted(nearest, key=lambda x: x[1])
