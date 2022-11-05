@@ -4,7 +4,13 @@ from xml.sax.handler import feature_external_ges
 from matplotlib import pyplot as plt
 from numpy.typing import ArrayLike
 from numpy import float32
-from mesh_data import MeshData, get_database_as_feature_matrix, get_feature_vector
+from mesh_data import (
+    MeshData,
+    get_database_as_feature_matrix,
+    get_database_as_standardized_feature_matrix,
+    get_feature_vector,
+    get_standard_feature_vec,
+)
 import math
 import numpy as np
 import decorators
@@ -53,53 +59,10 @@ def get_distances(mesh_1: ArrayLike, mesh_2: ArrayLike) -> ArrayLike:
     return distances
 
 
-def get_mean_std(feature_matrix: ArrayLike) -> tuple[ArrayLike, ArrayLike]:
-    mean = np.mean(feature_matrix[:, :5], axis=0)
-    std = np.std(feature_matrix[:, :5], axis=0)
-    print(mean)
-    print(std)
-    return mean, std
-
-
-def standardize_feature_matrix(feature_matrix: ArrayLike) -> ArrayLike:
-    mean, std = get_mean_std(feature_matrix)
-    new_array = np.zeros(feature_matrix.shape)
-
-    for i in range(len(feature_matrix)):
-        vec = feature_matrix[i].reshape(-1)
-        vec = standardize_feature_vec(vec, mean, std)
-        new_array[i] = vec
-    return new_array
-
-
-def get_standard_feature_vec(mesh: MeshData, mean: ArrayLike, std: ArrayLike) -> ArrayLike:
-    feature_vector = get_feature_vector(mesh)
-    feature_vector = standardize_feature_vec(feature_vector, mean, std)
-    return feature_vector
-
-
-def standardize_feature_vec(vec: ArrayLike, mean: ArrayLike, std: ArrayLike) -> ArrayLike:
-    simple = 5
-    index_0 = int(simple + 100 * 0)
-    index_1 = int(simple + 100 * 1)
-    index_2 = int(simple + 100 * 2)
-    index_3 = int(simple + 100 * 3)
-    index_4 = int(simple + 100 * 4)
-    index_5 = int(simple + 100 * 5)
-    vec[:5] = (vec[:5] - mean) / std
-    vec[index_0:index_1] = vec[index_0:index_1] / np.sum(vec[index_0:index_1])
-    vec[index_1:index_2] = vec[index_1:index_2] / np.sum(vec[index_1:index_2])
-    vec[index_2:index_3] = vec[index_2:index_3] / np.sum(vec[index_2:index_3])
-    vec[index_3:index_4] = vec[index_3:index_4] / np.sum(vec[index_3:index_4])
-    vec[index_4:index_5] = vec[index_4:index_5] / np.sum(vec[index_4:index_5])
-    return vec
-
-
 @decorators.time_func
 @decorators.cache_result
 def create_knn_structure(meshes: list[MeshData], k: int) -> NearestNeighbors:
-    feature_matrix = get_database_as_feature_matrix(meshes)
-    standardize_feature_matrix(feature_matrix)
+    feature_matrix = get_database_as_standardized_feature_matrix(meshes)
 
     # neigh = NearestNeighbors(n_neighbors=k, metric=mesh_naive_distance)
     neigh = NearestNeighbors(n_neighbors=k, metric=mesh_distance)
