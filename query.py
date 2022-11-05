@@ -1,9 +1,16 @@
+from multiprocessing.dummy import Array
 from turtle import distance
 from xml.sax.handler import feature_external_ges
 from matplotlib import pyplot as plt
 from numpy.typing import ArrayLike
 from numpy import float32
-from mesh_data import MeshData, get_database_as_feature_matrix, get_feature_vector
+from mesh_data import (
+    MeshData,
+    get_database_as_feature_matrix,
+    get_database_as_standardized_feature_matrix,
+    get_feature_vector,
+    get_standard_feature_vec,
+)
 import math
 import numpy as np
 import decorators
@@ -52,19 +59,10 @@ def get_distances(mesh_1: ArrayLike, mesh_2: ArrayLike) -> ArrayLike:
     return distances
 
 
-def get_mean_std(meshes: list[MeshData]) -> ArrayLike:
-    features = get_database_as_feature_matrix(meshes)
-    mean = np.mean(features, axis=0)
-    std = np.std(features, axis=0)
-    print(mean, std)
-    print(mean.shape, std.shape)
-    return mean, std
-
-
 @decorators.time_func
 @decorators.cache_result
 def create_knn_structure(meshes: list[MeshData], k: int) -> NearestNeighbors:
-    feature_matrix = get_database_as_feature_matrix(meshes)
+    feature_matrix = get_database_as_standardized_feature_matrix(meshes)
 
     # neigh = NearestNeighbors(n_neighbors=k, metric=mesh_naive_distance)
     neigh = NearestNeighbors(n_neighbors=k, metric=mesh_distance)
@@ -74,17 +72,19 @@ def create_knn_structure(meshes: list[MeshData], k: int) -> NearestNeighbors:
 
 
 def query_knn(
-    mesh: MeshData, meshes: list[MeshData], knn: NearestNeighbors, k: int
+    mesh: MeshData, meshes: list[MeshData], knn: NearestNeighbors, mean: ArrayLike, std: ArrayLike
 ) -> list[tuple[MeshData, float, ArrayLike]]:
-    feature_vector = get_feature_vector(mesh)
+    feature_vector = get_standard_feature_vec(mesh, mean, std)
     feature_vector = feature_vector.reshape(1, -1)
     distances, indices = knn.kneighbors(feature_vector)
     distances = distances.reshape(-1)
     indices = indices.reshape(-1)
     results = []
     for i in range(len(indices)):
-        vec_other = get_feature_vector(meshes[indices[i]])
-        results.append((meshes[indices[i]], distances[i], get_distances(get_feature_vector(mesh), vec_other)))
+        vec_other = get_standard_feature_vec(meshes[indices[i]], mean, std)
+        results.append(
+            (meshes[indices[i]], distances[i], get_distances(get_standard_feature_vec(mesh, mean, std), vec_other))
+        )
     return results
 
 
