@@ -43,10 +43,10 @@ def get_distances(mesh_1: ArrayLike, mesh_2: ArrayLike) -> ArrayLike:
     index_4 = int(simple + hist * 4)
     index_5 = int(simple + hist * 5)
 
-    distances = (
+    distances = np.abs(
         np.hstack(
             [
-                (mesh_1[:simple] - mesh_2[:simple]),
+                (mesh_1[:simple] - mesh_2[:simple]) * 5,
                 emd_np(mesh_1[index_0:index_1], mesh_2[index_0:index_1]),
                 emd_np(mesh_1[index_1:index_2], mesh_2[index_1:index_2]),
                 emd_np(mesh_1[index_2:index_3], mesh_2[index_2:index_3]),
@@ -54,7 +54,6 @@ def get_distances(mesh_1: ArrayLike, mesh_2: ArrayLike) -> ArrayLike:
                 emd_np(mesh_1[index_4:index_5], mesh_2[index_4:index_5]),
             ]
         )
-        ** 2
     )
     return distances
 

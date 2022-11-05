@@ -2,9 +2,11 @@ from numpy.core.fromnumeric import mean
 from asyncio import Handle
 
 from sklearn import pipeline
+from sklearn.manifold import TSNE
 from gui import HandleGUIEvents, initGUI
 import mesh_io
 import renderer
+from renderer import RenderMode
 import filter_io
 import decorators
 import mesh_normalize
@@ -96,6 +98,8 @@ if __name__ == "__main__":
     window = initGUI()
     data_mean, data_std = mesh_data.get_mean_std(mesh_data.get_database_as_feature_matrix(meshes))
 
+    renderer.render_meshes(meshes, RenderMode.TSNE)
+
     while True:  # The Event Loop
         event_return = HandleGUIEvents(window, minmax_data)
         if isinstance(event_return, bool):
@@ -108,7 +112,7 @@ if __name__ == "__main__":
             print(nearest)
             nearest = sorted(nearest, key=lambda x: x[1])
             torender = [mesh[0] for mesh in nearest]
-            viewer = renderer.render_meshes(torender)
+            viewer = renderer.render_meshes(torender, RenderMode.INORDER)
 
     viewer.close()
     window.close()
