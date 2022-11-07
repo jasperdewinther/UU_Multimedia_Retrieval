@@ -23,7 +23,7 @@ def failing_apply(obj: MeshData, func: Callable, *arguments) -> Union[MeshData, 
 def fast_for(meshes: list[MeshData], func: Callable, *arguments) -> list[MeshData]:
     # unfortunately is still slower than expected
     if PARALLEL_FOR_LOOP:
-        with Pool(cpu_count()) as p:
+        with Pool(8) as p:
             new_list = p.starmap(failing_apply, tqdm([[mesh, func, *arguments] for mesh in meshes]))
     else:
         new_list = starmap(failing_apply, tqdm([[mesh, func, *arguments] for mesh in meshes]))

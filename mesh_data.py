@@ -16,14 +16,17 @@ class MeshData:
     vertex_count: int
     face_count: int
     surface_area: float
+    volume: float
     compactness: float
     aabb_volume: float
     obb_volume: float
+    aaobb_volume_ratio: float
     rectangularity: float
     diameter: float
     eccentricity: float
     broken_faces_count: int
     barycenter_dist_to_origin: float
+    eigenvector_offset: float  # cos of angle between x-axis and major eigenvector
     A3: ArrayLike
     A3_binsize: ArrayLike
     D1: ArrayLike
@@ -43,6 +46,7 @@ class MeshData:
         self.vertex_count = 0
         self.face_count = 0
         self.surface_area = 0
+        self.volume = None
         self.compactness = 0
         self.aabb_volume = 0
         self.obb_volume = 0
@@ -109,8 +113,10 @@ def summarize_data(meshes: list[MeshData], figure_filename: str = None, csv_file
             "diameter": [mesh.diameter],
             "broken_faces_count": [mesh.broken_faces_count],
             "barycenter_dist_to_origin": [mesh.barycenter_dist_to_origin],
+            "cosine_of_angle_major_eigenvector_and_x-axis": [mesh.eigenvector_offset],
         }
         df = pd.concat((pd.DataFrame.from_dict(data), df), ignore_index=True)
+    print(df.describe())
     df.hist(bins=100, figsize=(20, 14))  # s is an instance of Series
     df.round(3)
     print(df.describe().to_latex())
@@ -148,12 +154,7 @@ def render_class_histograms(meshes: list[MeshData], folder_name: str):
             plt.savefig(f"{folder_name}/hist_{current_class}_A3.png")
             plt.clf()
             current_class = mesh.mesh_class
-        plot_points = []
-        for i in range(len(mesh.A3_binsize)-1):
-            plot_points.append((mesh.A3_binsize[i] + mesh.A3_binsize[i+1]) / 2)
-
-        plt.plot(plot_points, mesh.A3)
-        #plt.stairs(mesh.A3, mesh.A3_binsize, fill=False)
+        plt.stairs(mesh.A3, mesh.A3_binsize, fill=False)
     plt.savefig(f"{folder_name}/hist_{current_class}_A3.png")
     plt.clf()
 
@@ -163,12 +164,7 @@ def render_class_histograms(meshes: list[MeshData], folder_name: str):
             plt.savefig(f"{folder_name}/hist_{current_class}_D1.png")
             plt.clf()
             current_class = mesh.mesh_class
-        plot_points = []
-        for i in range(len(mesh.D1_binsize)-1):
-            plot_points.append((mesh.D1_binsize[i] + mesh.D1_binsize[i+1]) / 2)
-
-        plt.plot(plot_points, mesh.D1)
-        #plt.stairs(mesh.D1, mesh.D1_binsize, fill=False)
+        plt.stairs(mesh.D1, mesh.D1_binsize, fill=False)
     plt.savefig(f"{folder_name}/hist_{current_class}_D1.png")
     plt.clf()
 
@@ -178,12 +174,7 @@ def render_class_histograms(meshes: list[MeshData], folder_name: str):
             plt.savefig(f"{folder_name}/hist_{current_class}_D2.png")
             plt.clf()
             current_class = mesh.mesh_class
-        plot_points = []
-        for i in range(len(mesh.D2_binsize)-1):
-            plot_points.append((mesh.D2_binsize[i] + mesh.D2_binsize[i+1]) / 2)
-
-        plt.plot(plot_points, mesh.D2)
-        #plt.stairs(mesh.D2, mesh.D2_binsize, fill=False)
+        plt.stairs(mesh.D2, mesh.D2_binsize, fill=False)
     plt.savefig(f"{folder_name}/hist_{current_class}_D2.png")
     plt.clf()
 
@@ -193,12 +184,7 @@ def render_class_histograms(meshes: list[MeshData], folder_name: str):
             plt.savefig(f"{folder_name}/hist_{current_class}_D3.png")
             plt.clf()
             current_class = mesh.mesh_class
-        plot_points = []
-        for i in range(len(mesh.D3_binsize)-1):
-            plot_points.append((mesh.D3_binsize[i] + mesh.D3_binsize[i+1]) / 2)
-
-        plt.plot(plot_points, mesh.D3)
-        #plt.stairs(mesh.D3, mesh.D3_binsize, fill=False)
+        plt.stairs(mesh.D3, mesh.D3_binsize, fill=False)
     plt.savefig(f"{folder_name}/hist_{current_class}_D3.png")
     plt.clf()
 
@@ -208,12 +194,7 @@ def render_class_histograms(meshes: list[MeshData], folder_name: str):
             plt.savefig(f"{folder_name}/hist_{current_class}_D4.png")
             plt.clf()
             current_class = mesh.mesh_class
-        plot_points = []
-        for i in range(len(mesh.D4_binsize)-1):
-            plot_points.append((mesh.D4_binsize[i] + mesh.D4_binsize[i+1]) / 2)
-
-        plt.plot(plot_points, mesh.D4)
-        #plt.stairs(mesh.D4, mesh.D4_binsize, fill=False)
+        plt.stairs(mesh.D4, mesh.D4_binsize, fill=False)
     plt.savefig(f"{folder_name}/hist_{current_class}_D4.png")
     plt.clf()
 
@@ -246,16 +227,63 @@ def get_database_as_feature_matrix(meshes: list[MeshData]) -> ArrayLike:
     return feature_matrix
 
 
+def get_database_as_standardized_feature_matrix(meshes: list[MeshData]) -> ArrayLike:
+    matrix = get_database_as_feature_matrix(meshes)
+    return standardize_feature_matrix(matrix)
+
+
+def get_mean_std(feature_matrix: ArrayLike) -> tuple[ArrayLike, ArrayLike]:
+    mean = np.mean(feature_matrix[:, :5], axis=0)
+    std = np.std(feature_matrix[:, :5], axis=0)
+    print(mean)
+    print(std)
+    return mean, std
+
+
+def standardize_feature_matrix(feature_matrix: ArrayLike) -> ArrayLike:
+    mean, std = get_mean_std(feature_matrix)
+    new_array = np.zeros(feature_matrix.shape)
+
+    for i in range(len(feature_matrix)):
+        vec = feature_matrix[i].reshape(-1)
+        vec = standardize_feature_vec(vec, mean, std)
+        new_array[i] = vec
+    return new_array
+
+
+def get_standard_feature_vec(mesh: MeshData, mean: ArrayLike, std: ArrayLike) -> ArrayLike:
+    feature_vector = get_feature_vector(mesh)
+    feature_vector = standardize_feature_vec(feature_vector, mean, std)
+    return feature_vector
+
+
+def standardize_feature_vec(vec: ArrayLike, mean: ArrayLike, std: ArrayLike) -> ArrayLike:
+    simple = 5
+    index_0 = int(simple + 100 * 0)
+    index_1 = int(simple + 100 * 1)
+    index_2 = int(simple + 100 * 2)
+    index_3 = int(simple + 100 * 3)
+    index_4 = int(simple + 100 * 4)
+    index_5 = int(simple + 100 * 5)
+    vec[:5] = (vec[:5] - mean) / std
+    vec[index_0:index_1] = vec[index_0:index_1] / np.sum(vec[index_0:index_1])
+    vec[index_1:index_2] = vec[index_1:index_2] / np.sum(vec[index_1:index_2])
+    vec[index_2:index_3] = vec[index_2:index_3] / np.sum(vec[index_2:index_3])
+    vec[index_3:index_4] = vec[index_3:index_4] / np.sum(vec[index_3:index_4])
+    vec[index_4:index_5] = vec[index_4:index_5] / np.sum(vec[index_4:index_5])
+    return vec
+
+
 def get_median_mesh(meshes: list[MeshData], member: str) -> MeshData:
     values = [getattr(mesh, member) for mesh in meshes]
-    return values[np.argsort(values)[len(values) // 2]]
+    return meshes[np.argsort(values)[len(values) // 2]]
 
 
 def get_outlier_high_mesh(meshes: list[MeshData], member: str) -> MeshData:
     values = [getattr(mesh, member) for mesh in meshes]
-    return values[np.argmax(values)]
+    return meshes[np.argmax(values)]
 
 
 def get_outlier_low_mesh(meshes: list[MeshData], member: str) -> MeshData:
     values = [getattr(mesh, member) for mesh in meshes]
-    return values[np.argmin(values)]
+    return meshes[np.argmin(values)]

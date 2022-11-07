@@ -15,9 +15,10 @@ from typing import Union
 import time
 import matplotlib.pyplot as plt
 from numpy.typing import ArrayLike
+import normalization
 
 
-def get_global_descriptor(mesh: MeshData, descriptor_iterations: int) -> MeshData:
+def get_global_descriptor(mesh: MeshData, descriptor_iterations: int, d1_iterations: int) -> MeshData:
     # finds the surface area, compactness, axis-aligned bounding-box volume, diameter and eccentricity
     class_shape = get_class(mesh.filename)
     faces, vertices = get_faces_vertices(mesh.trimesh_data)
@@ -31,8 +32,11 @@ def get_global_descriptor(mesh: MeshData, descriptor_iterations: int) -> MeshDat
     triangles = mesh.trimesh_data.vertices.view(np.ndarray)[mesh.trimesh_data.faces]
     triangles = triangles - mesh.trimesh_data.centroid
     crossed = np.cross(triangles[:, 0, :], triangles[:, 1, :])
-    volume = np.sum(
-        triangles[:, 2, 0] * crossed[:, 0] + triangles[:, 2, 1] * crossed[:, 1] + triangles[:, 2, 2] * crossed[:, 2]
+    volume = (
+        np.sum(
+            triangles[:, 2, 0] * crossed[:, 0] + triangles[:, 2, 1] * crossed[:, 1] + triangles[:, 2, 2] * crossed[:, 2]
+        )
+        / 6
     )
 
     compactness = (surface_area**3) / (36 * math.pi * (volume**2))
@@ -51,11 +55,13 @@ def get_global_descriptor(mesh: MeshData, descriptor_iterations: int) -> MeshDat
 
     # eccentricity
     eigenvalues = mesh.trimesh_data.principal_inertia_components
-    eccentricity = max(eigenvalues) - min(eigenvalues)
+    eccentricity = max(eigenvalues) / min(eigenvalues)
+
+    nothing, eigenvectors = normalization.GetEigenValuesAndVectors(mesh.trimesh_data)
 
     # shape properties
     mesh.mesh_class = class_shape
-    A3, D1, D2, D3, D4 = get_shape_properties(mesh, descriptor_iterations)
+    A3, D1, D2, D3, D4 = get_shape_properties(mesh, descriptor_iterations, d1_iterations)
 
     mesh.broken_faces_count = len(trimesh.repair.broken_faces(mesh.trimesh_data))
     mesh.trimesh_data = Trimesh(mesh.trimesh_data.vertices, mesh.trimesh_data.faces)
@@ -66,9 +72,11 @@ def get_global_descriptor(mesh: MeshData, descriptor_iterations: int) -> MeshDat
     mesh.compactness = compactness
     mesh.aabb_volume = aabb_volume
     mesh.obb_volume = obb_volume
+    mesh.aaobb_volume_ratio = obb_volume / aabb_volume
     mesh.rectangularity = rectangularity
     mesh.diameter = diameter
     mesh.eccentricity = eccentricity
+    mesh.eigenvector_offset = abs(np.dot(eigenvectors[0], [1, 0, 0]))
     mesh.barycenter_dist_to_origin = math.dist([0, 0, 0], mesh.trimesh_data.centroid)
     mesh.A3 = A3
     mesh.D1 = D1
@@ -104,7 +112,7 @@ def get_minmax_shape_properties(meshes: list[MeshData]) -> list[float]:
     return [minA3, maxA3, minD1, maxD1, minD2, maxD2, minD3, maxD3, minD4, maxD4]
 
 
-def gen_histograms(mesh: MeshData, min_max: list[float], descriptor_iterations: int):
+def gen_histograms(mesh: MeshData, min_max: list[float]):
     minA3 = min_max[0]
     maxA3 = min_max[1]
     minD1 = min_max[2]
@@ -116,33 +124,23 @@ def gen_histograms(mesh: MeshData, min_max: list[float], descriptor_iterations: 
     minD4 = min_max[8]
     maxD4 = min_max[9]
 
-    counts, bin_sizes = np.histogram(
-        mesh.A3, math.floor(descriptor_iterations ** (1 / 2)), [math.floor(minA3), math.ceil(maxA3)]
-    )
+    counts, bin_sizes = np.histogram(mesh.A3, 100, [math.floor(minA3), math.ceil(maxA3)])
     mesh.A3 = counts
     mesh.A3_binsize = bin_sizes
 
-    counts, bin_sizes = np.histogram(
-        mesh.D1, math.floor(descriptor_iterations ** (1 / 2)), [math.floor(minD1), math.ceil(maxD1)]
-    )
+    counts, bin_sizes = np.histogram(mesh.D1, 100, [math.floor(minD1), math.ceil(maxD1)])
     mesh.D1 = counts
     mesh.D1_binsize = bin_sizes
 
-    counts, bin_sizes = np.histogram(
-        mesh.D2, math.floor(descriptor_iterations ** (1 / 2)), [math.floor(minD2), math.ceil(maxD2)]
-    )
+    counts, bin_sizes = np.histogram(mesh.D2, 100, [math.floor(minD2), math.ceil(maxD2)])
     mesh.D2 = counts
     mesh.D2_binsize = bin_sizes
 
-    counts, bin_sizes = np.histogram(
-        mesh.D3, math.floor(descriptor_iterations ** (1 / 2)), [math.floor(minD3), math.ceil(maxD3)]
-    )
+    counts, bin_sizes = np.histogram(mesh.D3, 100, [math.floor(minD3), math.ceil(maxD3)])
     mesh.D3 = counts
     mesh.D3_binsize = bin_sizes
 
-    counts, bin_sizes = np.histogram(
-        mesh.D4, math.floor(descriptor_iterations ** (1 / 2)), [math.floor(minD4), math.ceil(maxD4)]
-    )
+    counts, bin_sizes = np.histogram(mesh.D4, 100, [math.floor(minD4), math.ceil(maxD4)])
     mesh.D4 = counts
     mesh.D4_binsize = bin_sizes
     return mesh
@@ -183,7 +181,7 @@ def get_bounding_box(mesh: Trimesh) -> list[float]:
 
 
 def get_shape_properties(
-    mesh: MeshData, iterations: int
+    mesh: MeshData, iterations: int, d1_iterations: int
 ) -> Union[ArrayLike, ArrayLike, ArrayLike, ArrayLike, ArrayLike]:
     # finds A3, D1, D2, D3, D4
 
@@ -191,7 +189,7 @@ def get_shape_properties(
 
     n = iterations
     A3 = np.zeros(n)
-    D1 = np.zeros(n)
+    D1 = np.zeros(d1_iterations)
     D2 = np.zeros(n)
     D3 = np.zeros(n)
     D4 = np.zeros(n)
@@ -227,7 +225,7 @@ def get_shape_properties(
 
     # D1: distance between barycenter and random vertex
     # n = N
-    for i in range(n):
+    for i in range(d1_iterations):
         vi = random.randint(0, N)
 
         vertexi = mesh.trimesh_data.vertices[vi]
