@@ -31,19 +31,7 @@ if __name__ == "__main__":
     # Load all meshes into ram
     meshes = pipeline_stages.get_all_meshes(meshes)
     # meshes = pipeline_stages.get_global_descriptors(meshes, 1000)
-
-    # max_index = mesh_data.get_outlier_high_mesh(meshes, "broken_faces_count")
-    # median_index = mesh_data.get_median_mesh(meshes, "broken_faces_count")
-    # min_index = mesh_data.get_outlier_low_mesh(meshes, "broken_faces_count")
-    # print(max_index, median_index, min_index)
-    ## Select meshes to render
-    # torender = [
-    #    max_index,
-    # ]
-    # print(torender)
-    #
-    ## Render selected meshes
-    # renderer.render_meshes(torender)
+    # meshes, _ = pipeline_stages.get_global_descriptors(meshes, 1, 1)
 
     meshes = pipeline_stages.remove_nan_inf_models(meshes)
 
@@ -84,6 +72,17 @@ if __name__ == "__main__":
     # #torender = [meshes[191]]
     # renderer.render_meshes(torender)
     # windor = initGUI()
+
+    # max_index = mesh_data.get_outlier_high_mesh(meshes, "obb_volume")
+    # median_index = mesh_data.get_median_mesh(meshes, "obb_volume")
+    # min_index = mesh_data.get_outlier_low_mesh(meshes, "obb_volume")
+    # print(max_index, median_index, min_index)
+    # Select meshes to render
+    # torender = [max_index, median_index, min_index]
+    # print(torender)
+
+    # Render selected meshes
+    # renderer.render_meshes(torender, RenderMode.INORDER)
 
     knn = query.create_knn_structure(meshes, 9)
 

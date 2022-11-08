@@ -16,7 +16,6 @@ class MeshData:
     vertex_count: int
     face_count: int
     surface_area: float
-    volume: float
     compactness: float
     aabb_volume: float
     obb_volume: float
@@ -46,7 +45,6 @@ class MeshData:
         self.vertex_count = 0
         self.face_count = 0
         self.surface_area = 0
-        self.volume = None
         self.compactness = 0
         self.aabb_volume = 0
         self.obb_volume = 0
@@ -300,6 +298,8 @@ def standardize_feature_vec(vec: ArrayLike, mean: ArrayLike, std: ArrayLike) -> 
 
 def get_median_mesh(meshes: list[MeshData], member: str) -> MeshData:
     values = [getattr(mesh, member) for mesh in meshes]
+    print(values)
+    print(np.argsort(values))
     return meshes[np.argsort(values)[len(values) // 2]]
 
 
