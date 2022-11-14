@@ -296,8 +296,6 @@ def standardize_feature_vec(vec: ArrayLike, mean: ArrayLike, std: ArrayLike) -> 
 
 def get_median_mesh(meshes: list[MeshData], member: str) -> MeshData:
     values = [getattr(mesh, member) for mesh in meshes]
-    print(values)
-    print(np.argsort(values))
     return meshes[np.argsort(values)[len(values) // 2]]
 
 
