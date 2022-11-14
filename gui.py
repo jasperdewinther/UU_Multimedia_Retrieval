@@ -39,7 +39,7 @@ def PrepareInputModel(filename: str, minmax_data: list[float]) -> MeshData:
     data = normalization.NormalizeTranslation(data)
     data = normalization.NormalizeScale(data)
     data = normalization.NormalizeAlignment(data)
-    data = descriptors.get_global_descriptor(data, 5000, 5000)
+    data = descriptors.get_global_descriptor(data, 100000, 10000)
     data = descriptors.gen_histograms(data, minmax_data)
 
     return data

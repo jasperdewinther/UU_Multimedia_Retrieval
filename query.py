@@ -43,6 +43,8 @@ def get_distances(mesh_1: ArrayLike, mesh_2: ArrayLike) -> ArrayLike:
     index_4 = int(simple + hist * 4)
     index_5 = int(simple + hist * 5)
 
+    weights = [5, 50, 5, 5, 50, 1, 1, 1, 1, 1]
+
     distances = (
         np.hstack(
             [
@@ -56,7 +58,7 @@ def get_distances(mesh_1: ArrayLike, mesh_2: ArrayLike) -> ArrayLike:
         )
         ** 2
     )
-    return distances
+    return np.multiply(distances, weights)
 
 
 @decorators.time_func
