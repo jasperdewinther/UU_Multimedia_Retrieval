@@ -10,6 +10,8 @@ figure.pdf
 *.png
 *.csv
 *.zip
+*.7z
+*.rar
 
 
 # C extensions
