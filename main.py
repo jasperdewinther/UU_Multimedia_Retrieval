@@ -106,12 +106,9 @@ if __name__ == "__main__":
                 break
         if isinstance(event_return, mesh_data.MeshData):
             nearest = query.query_knn(event_return, meshes, knn, data_mean, data_std)
-            print(nearest)
-            nearest = query.query_brute_force(event_return, meshes, data_mean, data_std, 9)
-            print(nearest)
+            # nearest = query.query_brute_force(event_return, meshes, data_mean, data_std, 9)
             # [0] = mesh, [1] = distance, [2] individual dist per component
             query.show_distances(nearest)
-            print(nearest)
             nearest = sorted(nearest, key=lambda x: x[1])
             torender = [mesh[0] for mesh in nearest]
             viewer = renderer.render_meshes(torender, RenderMode.INORDER)
