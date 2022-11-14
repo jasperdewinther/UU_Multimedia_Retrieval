@@ -1,9 +1,12 @@
-from multiprocessing.dummy import Array
-from turtle import distance
-from xml.sax.handler import feature_external_ges
+import math
+
+import numpy as np
 from matplotlib import pyplot as plt
-from numpy.typing import ArrayLike
 from numpy import float32
+from numpy.typing import ArrayLike
+from sklearn.neighbors import NearestNeighbors
+
+import decorators
 from mesh_data import (
     MeshData,
     get_database_as_feature_matrix,
@@ -11,11 +14,6 @@ from mesh_data import (
     get_feature_vector,
     get_standard_feature_vec,
 )
-import math
-import numpy as np
-import decorators
-
-from sklearn.neighbors import KNeighborsClassifier, NearestNeighbors
 
 
 def mesh_naive_distance(mesh_1: ArrayLike, mesh_2: ArrayLike) -> float32:
@@ -58,8 +56,6 @@ def get_distances(mesh_1: ArrayLike, mesh_2: ArrayLike) -> ArrayLike:
     return distances
 
 
-@decorators.time_func
-@decorators.cache_result
 def create_knn_structure(meshes: list[MeshData], k: int) -> NearestNeighbors:
     feature_matrix = get_database_as_standardized_feature_matrix(meshes)
 
@@ -83,6 +79,32 @@ def query_knn(
         vec_other = get_standard_feature_vec(meshes[indices[i]], mean, std)
         results.append(
             (meshes[indices[i]], distances[i], get_distances(get_standard_feature_vec(mesh, mean, std), vec_other))
+        )
+    return results
+
+
+def query_brute_force(
+    mesh: MeshData, meshes: list[MeshData], mean: ArrayLike, std: ArrayLike, k: int
+) -> list[tuple[MeshData, float, ArrayLike]]:
+    feature_matrix = get_database_as_standardized_feature_matrix(meshes)
+    feature_vector = get_standard_feature_vec(mesh, mean, std)
+    distances = []
+    for i in range(len(feature_matrix)):
+        dist = mesh_distance(feature_vector, feature_matrix[i].reshape(-1))
+        distances.append(dist)
+    sorted_indices = np.argsort(distances)
+
+    results = []
+    for i in range(k):
+        print(sorted_indices)
+        print(sorted_indices[i])
+        vec_other = get_standard_feature_vec(meshes[sorted_indices[i]], mean, std)
+        results.append(
+            (
+                meshes[sorted_indices[i]],
+                distances[sorted_indices[i]],
+                get_distances(get_standard_feature_vec(mesh, mean, std), vec_other),
+            )
         )
     return results
 

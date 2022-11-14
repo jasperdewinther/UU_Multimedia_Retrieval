@@ -97,7 +97,7 @@ if __name__ == "__main__":
     window = initGUI()
     data_mean, data_std = mesh_data.get_mean_std(mesh_data.get_database_as_feature_matrix(meshes))
 
-    renderer.render_meshes(meshes, RenderMode.TSNE)
+    # renderer.render_meshes(meshes, RenderMode.TSNE)
 
     while True:  # The Event Loop
         event_return = HandleGUIEvents(window, minmax_data)
@@ -106,6 +106,9 @@ if __name__ == "__main__":
                 break
         if isinstance(event_return, mesh_data.MeshData):
             nearest = query.query_knn(event_return, meshes, knn, data_mean, data_std)
+            print(nearest)
+            nearest = query.query_brute_force(event_return, meshes, data_mean, data_std, 9)
+            print(nearest)
             # [0] = mesh, [1] = distance, [2] individual dist per component
             query.show_distances(nearest)
             print(nearest)

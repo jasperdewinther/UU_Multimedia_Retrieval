@@ -257,8 +257,6 @@ def get_database_as_standardized_feature_matrix(meshes: list[MeshData]) -> Array
 def get_mean_std(feature_matrix: ArrayLike) -> tuple[ArrayLike, ArrayLike]:
     mean = np.mean(feature_matrix[:, :5], axis=0)
     std = np.std(feature_matrix[:, :5], axis=0)
-    print(mean)
-    print(std)
     return mean, std
 
 
