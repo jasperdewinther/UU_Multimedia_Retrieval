@@ -96,7 +96,8 @@ if __name__ == "__main__":
 
     # evaluation.graph_ROC(meshes)
 
-    knn = query.create_knn_structure(meshes, 20)
+    # exit()
+    knn = query.create_knn_structure(meshes, 50)
 
     # sword = [mesh for mesh in meshes if "m702.obj" in mesh.filename][0]
     # pig = [mesh for mesh in meshes if "m100.obj" in mesh.filename][0]

@@ -43,6 +43,8 @@ def graph_ROC(meshes: list[MeshData]):
     for mesh_i in range(len(meshes_subset)):
         if meshes_subset[mesh_i].mesh_class != current_class:
             plt.title(f"{current_class} AUROC {class_roc_sum/class_count:.2f}")
+            plt.xlabel("TP")
+            plt.ylabel("TN")
             plt.savefig(f"rocs/roc_{current_class}.png")
             plt.clf()
             current_class = meshes_subset[mesh_i].mesh_class
@@ -53,6 +55,8 @@ def graph_ROC(meshes: list[MeshData]):
         class_count += 1
 
     plt.title(f"{current_class} AUROC {class_roc_sum/class_count:.2f}")
+    plt.xlabel("TP")
+    plt.ylabel("TN")
     plt.savefig(f"rocs/roc_{current_class}.png")
     plt.clf()
 
@@ -64,5 +68,18 @@ def graph_ROC(meshes: list[MeshData]):
         class_count += 1
 
     plt.title(f"global AUROC {class_roc_sum/class_count:.2f}")
+    plt.xlabel("TP")
+    plt.ylabel("TN")
     plt.savefig(f"rocs/roc_global.png")
+    plt.clf()
+
+    global_true_positives = np.sum(true_positives, axis=0) / len(meshes_subset)
+    global_true_negatives = np.sum(true_negatives, axis=0) / len(meshes_subset)
+    roc = np.sum(global_true_positives) / len(meshes)
+
+    plt.plot(global_true_positives, global_true_negatives, "-")
+    plt.title(f"averaged AUROC {roc:.2f}")
+    plt.xlabel("TP")
+    plt.ylabel("TN")
+    plt.savefig(f"rocs/roc_averaged.png")
     plt.clf()
