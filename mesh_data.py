@@ -16,7 +16,6 @@ class MeshData:
     vertex_count: int
     face_count: int
     surface_area: float
-    volume: float
     compactness: float
     aabb_volume: float
     obb_volume: float
@@ -46,7 +45,6 @@ class MeshData:
         self.vertex_count = 0
         self.face_count = 0
         self.surface_area = 0
-        self.volume = None
         self.compactness = 0
         self.aabb_volume = 0
         self.obb_volume = 0
@@ -240,8 +238,6 @@ def get_database_as_standardized_feature_matrix(meshes: list[MeshData]) -> Array
 def get_mean_std(feature_matrix: ArrayLike) -> tuple[ArrayLike, ArrayLike]:
     mean = np.mean(feature_matrix[:, :5], axis=0)
     std = np.std(feature_matrix[:, :5], axis=0)
-    print(mean)
-    print(std)
     return mean, std
 
 

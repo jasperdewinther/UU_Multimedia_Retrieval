@@ -1,9 +1,12 @@
-from multiprocessing.dummy import Array
-from turtle import distance
-from xml.sax.handler import feature_external_ges
+import math
+
+import numpy as np
 from matplotlib import pyplot as plt
-from numpy.typing import ArrayLike
 from numpy import float32
+from numpy.typing import ArrayLike
+from sklearn.neighbors import NearestNeighbors
+
+import decorators
 from mesh_data import (
     MeshData,
     get_database_as_feature_matrix,
@@ -11,11 +14,6 @@ from mesh_data import (
     get_feature_vector,
     get_standard_feature_vec,
 )
-import math
-import numpy as np
-import decorators
-
-from sklearn.neighbors import KNeighborsClassifier, NearestNeighbors
 
 
 def mesh_naive_distance(mesh_1: ArrayLike, mesh_2: ArrayLike) -> float32:
@@ -43,12 +41,10 @@ def get_distances(mesh_1: ArrayLike, mesh_2: ArrayLike) -> ArrayLike:
     index_4 = int(simple + hist * 4)
     index_5 = int(simple + hist * 5)
 
-    weights = [5, 50, 5, 5, 50, 1, 1, 1, 1, 1]
-
-    distances = (
+    distances = np.abs(
         np.hstack(
             [
-                (mesh_1[:simple] - mesh_2[:simple]),
+                (mesh_1[:simple] - mesh_2[:simple]) * 5,
                 emd_np(mesh_1[index_0:index_1], mesh_2[index_0:index_1]),
                 emd_np(mesh_1[index_1:index_2], mesh_2[index_1:index_2]),
                 emd_np(mesh_1[index_2:index_3], mesh_2[index_2:index_3]),
@@ -56,13 +52,10 @@ def get_distances(mesh_1: ArrayLike, mesh_2: ArrayLike) -> ArrayLike:
                 emd_np(mesh_1[index_4:index_5], mesh_2[index_4:index_5]),
             ]
         )
-        ** 2
     )
     return np.multiply(distances, weights)
 
 
-@decorators.time_func
-@decorators.cache_result
 def create_knn_structure(meshes: list[MeshData], k: int) -> NearestNeighbors:
     feature_matrix = get_database_as_standardized_feature_matrix(meshes)
 
@@ -86,6 +79,32 @@ def query_knn(
         vec_other = get_standard_feature_vec(meshes[indices[i]], mean, std)
         results.append(
             (meshes[indices[i]], distances[i], get_distances(get_standard_feature_vec(mesh, mean, std), vec_other))
+        )
+    return results
+
+
+def query_brute_force(
+    mesh: MeshData, meshes: list[MeshData], mean: ArrayLike, std: ArrayLike, k: int
+) -> list[tuple[MeshData, float, ArrayLike]]:
+    feature_matrix = get_database_as_standardized_feature_matrix(meshes)
+    feature_vector = get_standard_feature_vec(mesh, mean, std)
+    distances = []
+    for i in range(len(feature_matrix)):
+        dist = mesh_distance(feature_vector, feature_matrix[i].reshape(-1))
+        distances.append(dist)
+    sorted_indices = np.argsort(distances)
+
+    results = []
+    for i in range(k):
+        print(sorted_indices)
+        print(sorted_indices[i])
+        vec_other = get_standard_feature_vec(meshes[sorted_indices[i]], mean, std)
+        results.append(
+            (
+                meshes[sorted_indices[i]],
+                distances[sorted_indices[i]],
+                get_distances(get_standard_feature_vec(mesh, mean, std), vec_other),
+            )
         )
     return results
 
