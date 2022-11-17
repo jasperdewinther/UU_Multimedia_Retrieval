@@ -53,7 +53,7 @@ def get_distances(mesh_1: ArrayLike, mesh_2: ArrayLike) -> ArrayLike:
             ]
         )
     )
-    return np.multiply(distances, weights)
+    return distances
 
 
 def create_knn_structure(meshes: list[MeshData], k: int) -> NearestNeighbors:
