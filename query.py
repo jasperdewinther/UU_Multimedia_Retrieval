@@ -41,10 +41,12 @@ def get_distances(mesh_1: ArrayLike, mesh_2: ArrayLike) -> ArrayLike:
     index_4 = int(simple + hist * 4)
     index_5 = int(simple + hist * 5)
 
+    weights = [5, 50, 5, 5, 50, 1, 1, 1, 1, 1]
+
     distances = np.abs(
         np.hstack(
             [
-                (mesh_1[:simple] - mesh_2[:simple]) * 5,
+                (mesh_1[:simple] - mesh_2[:simple]),
                 emd_np(mesh_1[index_0:index_1], mesh_2[index_0:index_1]),
                 emd_np(mesh_1[index_1:index_2], mesh_2[index_1:index_2]),
                 emd_np(mesh_1[index_2:index_3], mesh_2[index_2:index_3]),
@@ -53,7 +55,7 @@ def get_distances(mesh_1: ArrayLike, mesh_2: ArrayLike) -> ArrayLike:
             ]
         )
     )
-    return distances
+    return np.multiply(distances, weights)
 
 
 def create_knn_structure(meshes: list[MeshData], k: int) -> NearestNeighbors:
