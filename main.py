@@ -75,7 +75,7 @@ if __name__ == "__main__":
 
     # Create histograms and database csv
     # mesh_data.summarize_data(meshes, "after_histograms.png", "after_data.csv")
-    # mesh_data.render_class_histograms(meshes, "histograms_after/")
+    #mesh_data.render_class_histograms(meshes, "histograms_after/")
 
     # meshes[191] = normalization.NormalizeFlip(meshes[191])
     # torender = meshes[190:200]
@@ -121,7 +121,14 @@ if __name__ == "__main__":
             nearest = query.query_knn(event_return, meshes, knn, data_mean, data_std)
             # nearest = query.query_brute_force(event_return, meshes, data_mean, data_std, 9)
             # [0] = mesh, [1] = distance, [2] individual dist per component
-            query.show_distances(nearest)
+            #query.show_distances(nearest)
+            print(nearest)
+
+            distances = []
+            for mesh in nearest:
+                distances.append(mesh[len(nearest[0]) - 2])
+
+            print(distances)
             nearest = sorted(nearest, key=lambda x: x[1])
             torender = [mesh[0] for mesh in nearest]
             viewer = renderer.render_meshes(torender, RenderMode.INORDER)
