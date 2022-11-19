@@ -1,13 +1,10 @@
-from cgitb import small
 from mesh_data import MeshData
 from trimesh import Trimesh
 import numpy as np
 from numpy.typing import ArrayLike
-import decorators
 import descriptors
 import math
 import random
-import trimesh
 
 
 def GetBaryCenter(mesh: Trimesh) -> ArrayLike:
@@ -141,6 +138,7 @@ def NormalizeAlignment(mesh: MeshData) -> MeshData:
 
     return mesh
 
+
 def NormalizeFlip(mesh: MeshData) -> MeshData:
     xScale = np.sign(mesh.trimesh_data.center_mass[0])
     yScale = np.sign(mesh.trimesh_data.center_mass[1])
@@ -153,6 +151,7 @@ def NormalizeFlip(mesh: MeshData) -> MeshData:
 
     mesh.trimesh_data.fix_normals()
     return mesh
+
 
 def RandomlySamplePointsOverMesh(mesh: Trimesh, sampleCount: int) -> tuple[float, float, float]:
     vertices = []

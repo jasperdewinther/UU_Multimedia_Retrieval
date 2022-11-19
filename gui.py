@@ -1,9 +1,7 @@
 from typing import Union
 import PySimpleGUI as sg
-from descriptors import get_global_descriptor
 from mesh_data import MeshData
 import mesh_io
-import trimesh
 import descriptors
 
 import mesh_normalize

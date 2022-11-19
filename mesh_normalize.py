@@ -1,17 +1,6 @@
-from functools import reduce
-from turtle import distance
-from torch import preserve_format
-import trimesh
-import decorators
 from mesh_data import MeshData
 import pyfqmr
 from trimesh import Trimesh
-from trimesh import repair
-import os
-import pyvista as pv
-import pymeshfix
-from tqdm import tqdm
-import pymeshfix as mf
 import numpy as np
 
 

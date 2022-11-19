@@ -1,12 +1,6 @@
-from trimesh import Trimesh
-import os
-from typing import Union
-import csv
 import numpy as np
-import decorators
 from mesh_data import MeshData
 import math
-import trimesh
 
 
 def remove_nan_inf_model(mesh: MeshData) -> bool:

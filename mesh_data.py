@@ -1,11 +1,9 @@
-import math
 from numpy.typing import ArrayLike
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 from trimesh import Trimesh
 import os
-import decorators
 
 
 class MeshData:
@@ -153,7 +151,7 @@ def render_class_histograms(meshes: list[MeshData], folder_name: str):
             plt.clf()
             current_class = mesh.mesh_class
         bincenters = 0.5 * (mesh.A3_binsize[1:] + mesh.A3_binsize[:-1])
-        plt.plot(bincenters, mesh.A3, '-')
+        plt.plot(bincenters, mesh.A3, "-")
     plt.savefig(f"{folder_name}/hist_{current_class}_A3.png")
     plt.clf()
 
@@ -164,7 +162,7 @@ def render_class_histograms(meshes: list[MeshData], folder_name: str):
             plt.clf()
             current_class = mesh.mesh_class
         bincenters = 0.5 * (mesh.D1_binsize[1:] + mesh.D1_binsize[:-1])
-        plt.plot(bincenters, mesh.D1, '-')
+        plt.plot(bincenters, mesh.D1, "-")
     plt.savefig(f"{folder_name}/hist_{current_class}_D1.png")
     plt.clf()
 
@@ -175,7 +173,7 @@ def render_class_histograms(meshes: list[MeshData], folder_name: str):
             plt.clf()
             current_class = mesh.mesh_class
         bincenters = 0.5 * (mesh.D2_binsize[1:] + mesh.D2_binsize[:-1])
-        plt.plot(bincenters, mesh.D2, '-')
+        plt.plot(bincenters, mesh.D2, "-")
     plt.savefig(f"{folder_name}/hist_{current_class}_D2.png")
     plt.clf()
 
@@ -186,7 +184,7 @@ def render_class_histograms(meshes: list[MeshData], folder_name: str):
             plt.clf()
             current_class = mesh.mesh_class
         bincenters = 0.5 * (mesh.D3_binsize[1:] + mesh.D3_binsize[:-1])
-        plt.plot(bincenters, mesh.D3, '-')
+        plt.plot(bincenters, mesh.D3, "-")
     plt.savefig(f"{folder_name}/hist_{current_class}_D3.png")
     plt.clf()
 
@@ -197,7 +195,7 @@ def render_class_histograms(meshes: list[MeshData], folder_name: str):
             plt.clf()
             current_class = mesh.mesh_class
         bincenters = 0.5 * (mesh.D4_binsize[1:] + mesh.D4_binsize[:-1])
-        plt.plot(bincenters, mesh.D4, '-')
+        plt.plot(bincenters, mesh.D4, "-")
     plt.savefig(f"{folder_name}/hist_{current_class}_D4.png")
     plt.clf()
 

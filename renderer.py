@@ -1,13 +1,11 @@
 from enum import Enum
 import math
-from matplotlib import pyplot as plt
 from pyrender import Scene, Viewer, Mesh, PerspectiveCamera, Node
 import numpy as np
 from sklearn.manifold import TSNE
 import trimesh
 from mesh_data import MeshData, get_database_as_standardized_feature_matrix
 import colorsys
-import PySimpleGUI as sg
 
 from query import mesh_distance
 
@@ -37,12 +35,12 @@ def build_scene(meshes: list[MeshData], scene: Scene):
         node = scene.add(mesh)
         position = np.eye((4))
         position[:3, 3] = [
-            2* ((i % columns_and_rows) - columns_and_rows / 2),
-            2* (columns_and_rows / 2 - (i / columns_and_rows)),
+            2 * ((i % columns_and_rows) - columns_and_rows / 2),
+            2 * (columns_and_rows / 2 - (i / columns_and_rows)),
             -5,
         ]
         node.matrix = position
-        node2 = scene.add_node(Node(name = "test", matrix = position))
+        node2 = scene.add_node(Node(name="test", matrix=position))
 
     # set the camera settings
     cam = PerspectiveCamera(yfov=np.pi / 3.0, aspectRatio=1)

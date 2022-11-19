@@ -1,18 +1,13 @@
 import random
-from tkinter import E
 import trimesh
 from mesh_data import MeshData
 import math
-import ast
 from trimesh import Trimesh
 from scipy.spatial import ConvexHull
 from scipy.spatial.distance import cdist
 import numpy as np
-import pandas as pd
 import os
-import decorators
 from typing import Union
-import time
 import matplotlib.pyplot as plt
 from numpy.typing import ArrayLike
 import normalization

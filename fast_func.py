@@ -1,8 +1,7 @@
 from itertools import starmap
-from multiprocessing import Pool, cpu_count
+from multiprocessing import Pool
 from typing import Callable
 
-from numpy import float32
 from main import PARALLEL_FOR_LOOP
 from mesh_data import MeshData
 from typing import Union
